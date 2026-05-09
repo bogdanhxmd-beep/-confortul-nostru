@@ -10,15 +10,9 @@
 <title>Confortul Nostru 💕</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Pacifico&display=swap" rel="stylesheet">
 
-<!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, set, get, onValue, push, serverTimestamp }
-    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-  // ════════════════════════════════════════════
-  // 🔧 ÎNLOCUIEȘTE CU DATELE TALE FIREBASE AICI
-  // ════════════════════════════════════════════
+  import { getDatabase, ref, set, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
   const firebaseConfig = {
     apiKey: "AIzaSyDvjfYXHEPvM7dUOWuvz6AfkKbFYNe5cbQ",
     authDomain: "our-comfort.firebaseapp.com",
@@ -26,393 +20,199 @@
     projectId: "our-comfort",
     storageBucket: "our-comfort.firebasestorage.app",
     messagingSenderId: "224014412527",
-    appId: "1:224014412527:web:c8939abfab3f3f561f491a",
-    measurementId: "G-EXQLDD1SME"
+    appId: "1:224014412527:web:c8939abfab3f3f561f491a"
   };
-  // ════════════════════════════════════════════
-
   let app, db;
-  let configured = false;
-
-  try {
-    if (firebaseConfig.apiKey) {
-      app = initializeApp(firebaseConfig);
-      db = getDatabase(app);
-      configured = true;
-    }
-  } catch(e) { console.warn("Firebase not configured", e); }
-
-  window.__firebase = { db, configured, ref, set, get, onValue, push, serverTimestamp };
+  try { app = initializeApp(firebaseConfig); db = getDatabase(app); } catch(e) {}
+  window.__fb = { db, ref, set, onValue, push };
 </script>
 
 <style>
-  :root {
-    --pink: #ff85a1;
-    --pink-light: #ffb3c6;
-    --pink-pale: #fff0f3;
-    --pink-mid: #ffd6e0;
-    --pink-deep: #e8537a;
-    --white: #ffffff;
-    --text: #5a2d3a;
-    --text-light: #c47a8a;
-    --radius: 24px;
-    --shadow: 0 8px 32px rgba(255,133,161,0.25);
-  }
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --pink:#ff85a1; --pink-light:#ffb3c6; --pink-pale:#fff0f3;
+  --pink-mid:#ffd6e0; --pink-deep:#e8537a;
+  --text:#5a2d3a; --text-light:#c47a8a;
+  --radius:24px; --shadow:0 8px 32px rgba(255,133,161,0.25);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Nunito',sans-serif;background:linear-gradient(160deg,#fff0f3 0%,#ffd6e0 50%,#ffb3c6 100%);min-height:100vh;color:var(--text);overflow-x:hidden;}
+.hearts-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.hearts-bg span{position:absolute;opacity:0.12;animation:floatUp linear infinite;}
+@keyframes floatUp{0%{transform:translateY(100vh) rotate(0deg);opacity:0;}10%{opacity:0.12;}90%{opacity:0.12;}100%{transform:translateY(-10vh) rotate(360deg);opacity:0;}}
 
-  body {
-    font-family: 'Nunito', sans-serif;
-    background: linear-gradient(160deg, #fff0f3 0%, #ffd6e0 50%, #ffb3c6 100%);
-    min-height: 100vh; color: var(--text); overflow-x: hidden;
-  }
+/* SETUP */
+.setup-screen{position:fixed;inset:0;z-index:500;background:linear-gradient(160deg,#fff0f3,#ffd6e0);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px;gap:12px;overflow-y:auto;}
+.setup-logo{font-size:2.5rem;}
+.setup-title{font-family:'Pacifico',cursive;font-size:1.5rem;color:var(--pink-deep);text-align:center;}
+.setup-sub{font-size:0.82rem;color:var(--text-light);text-align:center;line-height:1.6;}
+.setup-card{background:white;border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);width:100%;max-width:360px;}
+.setup-label{font-size:0.72rem;font-weight:800;color:var(--text-light);margin-bottom:5px;letter-spacing:0.5px;text-transform:uppercase;}
+.setup-input{width:100%;background:var(--pink-pale);border:2px solid var(--pink-mid);border-radius:14px;padding:11px 14px;font-size:0.95rem;font-family:'Nunito',sans-serif;color:var(--text);outline:none;margin-bottom:11px;}
+.setup-input:focus{border-color:var(--pink);}
+.two-btns{display:flex;gap:9px;margin-bottom:11px;}
+.half-btn{flex:1;padding:10px 6px;border-radius:14px;border:2.5px solid var(--pink-mid);background:white;font-size:0.82rem;font-weight:700;color:var(--text-light);cursor:pointer;font-family:'Nunito',sans-serif;transition:all 0.2s;text-align:center;}
+.half-btn.active{border-color:var(--pink-deep);background:var(--pink-pale);color:var(--pink-deep);}
+.setup-btn{width:100%;background:linear-gradient(135deg,var(--pink),var(--pink-deep));border:none;border-radius:14px;padding:14px;font-size:1rem;font-weight:800;color:white;cursor:pointer;font-family:'Nunito',sans-serif;box-shadow:0 4px 16px rgba(232,83,122,0.4);}
 
-  .hearts-bg { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
-  .hearts-bg span { position:absolute; opacity:0.12; animation:floatUp linear infinite; }
-  @keyframes floatUp {
-    0% { transform:translateY(100vh) rotate(0deg); opacity:0; }
-    10% { opacity:0.12; } 90% { opacity:0.12; }
-    100% { transform:translateY(-10vh) rotate(360deg); opacity:0; }
-  }
+/* APP */
+.app{position:relative;z-index:1;max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:52px 18px 12px;background:rgba(255,255,255,0.78);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(255,133,161,0.15);}
+.topbar-title{font-family:'Pacifico',cursive;font-size:1.15rem;color:var(--pink-deep);display:flex;align-items:center;gap:5px;}
+.topbar-actions{display:flex;gap:5px;}
+.topbar-icon{width:36px;height:36px;background:var(--pink-pale);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;cursor:pointer;font-weight:800;color:var(--pink-deep);border:none;font-family:'Nunito',sans-serif;transition:transform 0.2s;}
+.topbar-icon:active{transform:scale(0.9);}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;}
+.sync-dot.online{background:#4ade80;box-shadow:0 0 6px rgba(74,222,128,0.6);}
 
-  /* SETUP SCREEN */
-  .setup-screen {
-    position:fixed; inset:0; z-index:500;
-    background: linear-gradient(160deg, #fff0f3, #ffd6e0);
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    padding:32px 24px; gap:16px;
-  }
-  .setup-logo { font-family:'Pacifico',cursive; font-size:2rem; color:var(--pink-deep); }
-  .setup-sub { font-size:0.9rem; color:var(--text-light); text-align:center; line-height:1.6; margin-bottom:8px; }
-  .setup-card {
-    background:white; border-radius:var(--radius); padding:24px;
-    box-shadow:var(--shadow); width:100%; max-width:360px;
-  }
-  .setup-label { font-size:0.8rem; font-weight:800; color:var(--text-light); margin-bottom:6px; letter-spacing:0.5px; }
-  .setup-input {
-    width:100%; background:var(--pink-pale); border:2px solid var(--pink-mid);
-    border-radius:14px; padding:12px 16px; font-size:0.95rem;
-    font-family:'Nunito',sans-serif; color:var(--text); outline:none; margin-bottom:14px;
-  }
-  .setup-input:focus { border-color:var(--pink); }
-  .setup-btn {
-    width:100%; background:linear-gradient(135deg,var(--pink),var(--pink-deep));
-    border:none; border-radius:14px; padding:14px;
-    font-size:1rem; font-weight:800; color:white; cursor:pointer;
-    font-family:'Nunito',sans-serif; box-shadow:0 4px 16px rgba(232,83,122,0.4);
-    margin-top:4px;
-  }
-  .setup-firebase-note {
-    background:rgba(255,133,161,0.1); border-radius:16px; padding:16px;
-    font-size:0.8rem; color:var(--text-light); line-height:1.8;
-    width:100%; max-width:360px;
-  }
-  .setup-firebase-note strong { color:var(--pink-deep); }
-  .setup-role-btns { display:flex; gap:10px; margin-bottom:14px; }
-  .role-btn {
-    flex:1; padding:10px; border-radius:14px; border:2.5px solid var(--pink-mid);
-    background:white; font-size:0.85rem; font-weight:700; color:var(--text-light);
-    cursor:pointer; font-family:'Nunito',sans-serif; transition:all 0.2s;
-  }
-  .role-btn.active { border-color:var(--pink-deep); background:var(--pink-pale); color:var(--pink-deep); }
+.page{display:none;flex:1;overflow-y:auto;padding-bottom:100px;}
+.page.active{display:block;}
 
-  /* MAIN APP */
-  .app { position:relative; z-index:1; max-width:430px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; }
+/* HOME */
+.couple-section{padding:22px 20px 0;display:flex;flex-direction:column;align-items:center;}
+.couple-avatars{display:flex;align-items:center;width:100%;justify-content:center;}
+.avatar-wrap{display:flex;flex-direction:column;align-items:center;gap:7px;}
+.avatar{width:86px;height:86px;border-radius:50%;border:3px solid white;box-shadow:0 4px 20px rgba(255,133,161,0.4);background:var(--pink-mid);display:flex;align-items:center;justify-content:center;font-size:2.3rem;transition:transform 0.2s;}
+.avatar-name{font-size:0.82rem;font-weight:700;color:var(--text);}
+.avatar-status-badge{background:white;border-radius:20px;padding:4px 11px;font-size:0.7rem;font-weight:700;color:var(--pink-deep);box-shadow:0 2px 12px rgba(255,133,161,0.3);white-space:nowrap;max-width:128px;overflow:hidden;text-overflow:ellipsis;text-align:center;}
+.heart-connector{padding:0 6px;margin-top:-26px;}
+.heart-connector span{font-size:1.9rem;animation:heartbeat 1.5s ease-in-out infinite;display:block;filter:drop-shadow(0 2px 8px rgba(255,133,161,0.5));}
+@keyframes heartbeat{0%,100%{transform:scale(1);}50%{transform:scale(1.2);}}
 
-  .topbar {
-    display:flex; align-items:center; justify-content:space-between;
-    padding:52px 20px 12px;
-    background:rgba(255,255,255,0.75); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
-    position:sticky; top:0; z-index:100;
-    border-bottom:1px solid rgba(255,133,161,0.15);
-  }
-  .topbar-title { font-family:'Pacifico',cursive; font-size:1.25rem; color:var(--pink-deep); }
-  .topbar-icon {
-    width:38px; height:38px; background:var(--pink-pale); border-radius:50%;
-    display:flex; align-items:center; justify-content:center; font-size:1.1rem; cursor:pointer;
-  }
-  .sync-dot {
-    width:8px; height:8px; border-radius:50%; background:#ccc;
-    display:inline-block; margin-left:6px; vertical-align:middle;
-    transition:background 0.3s;
-  }
-  .sync-dot.online { background:#4ade80; box-shadow:0 0 6px rgba(74,222,128,0.6); }
+.countdown-card{margin:14px 18px 0;background:white;border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);text-align:center;}
+.cd-label{font-size:0.85rem;font-weight:700;color:var(--text-light);margin-bottom:5px;}
+.cd-days{font-size:4.2rem;font-weight:900;color:var(--pink-deep);line-height:1;}
+.cd-unit{font-size:0.9rem;color:var(--text-light);font-weight:700;}
+.cd-time{display:flex;justify-content:center;gap:13px;margin:9px 0;}
+.time-block{text-align:center;}
+.time-num{font-size:1.4rem;font-weight:900;color:var(--text);display:block;}
+.time-lbl{font-size:0.65rem;color:var(--text-light);font-weight:600;}
+.cd-date{font-size:0.8rem;color:var(--text-light);font-weight:700;margin-top:6px;}
+.cd-quote{font-size:0.76rem;color:var(--text-light);margin-top:8px;line-height:1.5;font-style:italic;}
+.edit-date-btn{margin-top:9px;background:var(--pink-pale);border:none;border-radius:12px;padding:6px 13px;font-size:0.76rem;font-weight:700;color:var(--pink-deep);cursor:pointer;font-family:'Nunito',sans-serif;}
 
-  .page { display:none; flex:1; overflow-y:auto; padding-bottom:90px; }
-  .page.active { display:block; }
+.section-title{font-size:0.98rem;font-weight:800;color:var(--text);padding:16px 18px 9px;}
+.status-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 18px;}
+.status-btn{background:white;border:2.5px solid transparent;border-radius:15px;padding:10px 7px;font-size:0.82rem;font-weight:700;color:var(--text);cursor:pointer;text-align:center;transition:all 0.2s;font-family:'Nunito',sans-serif;box-shadow:0 2px 10px rgba(255,133,161,0.15);}
+.status-btn:active{transform:scale(0.96);}
+.status-btn.active{background:linear-gradient(135deg,var(--pink),var(--pink-deep));color:white;border-color:var(--pink-deep);box-shadow:0 4px 16px rgba(232,83,122,0.4);}
 
-  /* HOME */
-  .couple-section { padding:24px 20px 0; display:flex; flex-direction:column; align-items:center; gap:16px; }
-  .couple-avatars { display:flex; align-items:center; width:100%; justify-content:center; }
-  .avatar-wrap { display:flex; flex-direction:column; align-items:center; gap:8px; }
-  .avatar {
-    width:90px; height:90px; border-radius:50%; border:3px solid white;
-    box-shadow:0 4px 20px rgba(255,133,161,0.4);
-    background:var(--pink-mid); display:flex; align-items:center; justify-content:center;
-    font-size:2.5rem; cursor:pointer; transition:transform 0.2s; overflow:hidden;
-  }
-  .avatar img { width:100%; height:100%; object-fit:cover; }
-  .avatar:active { transform:scale(0.95); }
-  .avatar-name { font-size:0.85rem; font-weight:700; color:var(--text); }
-  .avatar-status-badge {
-    background:white; border-radius:20px; padding:5px 12px;
-    font-size:0.75rem; font-weight:700; color:var(--pink-deep);
-    box-shadow:0 2px 12px rgba(255,133,161,0.3); white-space:nowrap;
-  }
-  .heart-connector { display:flex; align-items:center; justify-content:center; padding:0 8px; margin-top:-30px; }
-  .heart-connector span { font-size:2rem; animation:heartbeat 1.5s ease-in-out infinite; filter:drop-shadow(0 2px 8px rgba(255,133,161,0.5)); }
-  @keyframes heartbeat { 0%,100%{transform:scale(1);} 50%{transform:scale(1.2);} }
+.quick-msgs{padding:0 18px;display:flex;flex-direction:column;gap:7px;}
+.quick-msg-btn{background:white;border:none;border-radius:15px;padding:12px 15px;font-size:0.85rem;font-weight:700;color:var(--text);cursor:pointer;text-align:left;box-shadow:0 2px 10px rgba(255,133,161,0.15);transition:all 0.2s;font-family:'Nunito',sans-serif;}
+.quick-msg-btn:active{transform:scale(0.98);background:var(--pink-pale);}
 
-  .countdown-card {
-    margin:16px 20px 0; background:white; border-radius:var(--radius);
-    padding:24px; box-shadow:var(--shadow); text-align:center;
-  }
-  .countdown-label { font-size:0.9rem; font-weight:700; color:var(--text-light); margin-bottom:8px; }
-  .countdown-days { font-size:5rem; font-weight:900; color:var(--pink-deep); line-height:1; }
-  .countdown-unit { font-size:1rem; color:var(--text-light); font-weight:700; }
-  .countdown-time { display:flex; justify-content:center; gap:16px; margin:12px 0; }
-  .time-block { text-align:center; }
-  .time-num { font-size:1.6rem; font-weight:900; color:var(--text); display:block; }
-  .time-lbl { font-size:0.7rem; color:var(--text-light); font-weight:600; }
-  .countdown-date { font-size:0.85rem; color:var(--text-light); font-weight:700; margin-top:8px; }
-  .countdown-quote { font-size:0.8rem; color:var(--text-light); margin-top:12px; line-height:1.5; font-style:italic; }
-  .edit-date-btn {
-    margin-top:12px; background:var(--pink-pale); border:none; border-radius:12px;
-    padding:8px 16px; font-size:0.8rem; font-weight:700; color:var(--pink-deep);
-    cursor:pointer; font-family:'Nunito',sans-serif;
-  }
+/* CHAT */
+.chat-header{padding:13px 18px;text-align:center;font-size:0.92rem;font-weight:800;color:var(--text);background:rgba(255,255,255,0.78);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,133,161,0.15);}
+.chat-messages{padding:13px 13px 0;display:flex;flex-direction:column;gap:8px;min-height:calc(100vh - 280px);}
+.msg-date{text-align:center;font-size:0.7rem;color:var(--text-light);font-weight:600;margin:5px 0;}
+.msg{max-width:75%;padding:9px 13px;border-radius:17px;font-size:0.85rem;font-weight:600;line-height:1.4;animation:msgIn 0.3s ease;}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px) scale(0.95);}to{opacity:1;transform:translateY(0) scale(1);}}
+.msg-time{font-size:0.61rem;opacity:0.7;margin-top:3px;display:block;}
+.msg.them{background:white;color:var(--text);align-self:flex-start;border-bottom-left-radius:4px;box-shadow:0 2px 8px rgba(255,133,161,0.15);}
+.msg.me{background:linear-gradient(135deg,var(--pink),var(--pink-deep));color:white;align-self:flex-end;border-bottom-right-radius:4px;}
+.msg.me .msg-time{text-align:right;}
+.msg-heart{font-size:2.7rem;filter:drop-shadow(0 4px 12px rgba(255,133,161,0.5));animation:heartbeat 1.5s ease-in-out infinite;}
+.chat-input-area{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);width:100%;max-width:430px;padding:8px 13px;background:rgba(255,255,255,0.93);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,133,161,0.15);display:flex;gap:6px;align-items:center;}
+.chat-input{flex:1;background:var(--pink-pale);border:none;border-radius:20px;padding:9px 13px;font-size:0.85rem;font-family:'Nunito',sans-serif;color:var(--text);outline:none;}
+.chat-input::placeholder{color:var(--text-light);}
+.send-btn{width:36px;height:36px;background:linear-gradient(135deg,var(--pink),var(--pink-deep));border:none;border-radius:50%;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(232,83,122,0.4);transition:transform 0.2s;}
+.send-btn:active{transform:scale(0.9);}
+.chat-extra-btn{width:33px;height:33px;background:var(--pink-pale);border:none;border-radius:50%;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 
-  .section-title { font-size:1rem; font-weight:800; color:var(--text); padding:20px 20px 10px; }
-  .status-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 20px; }
-  .status-btn {
-    background:white; border:2.5px solid transparent; border-radius:16px;
-    padding:12px 10px; font-size:0.88rem; font-weight:700; color:var(--text);
-    cursor:pointer; text-align:center; transition:all 0.2s;
-    font-family:'Nunito',sans-serif; box-shadow:0 2px 12px rgba(255,133,161,0.15);
-  }
-  .status-btn:active { transform:scale(0.96); }
-  .status-btn.active {
-    background:linear-gradient(135deg,var(--pink),var(--pink-deep)); color:white;
-    border-color:var(--pink-deep); box-shadow:0 4px 16px rgba(232,83,122,0.4);
-  }
+/* TOUCH */
+.touch-page{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 170px);padding:20px;gap:18px;}
+.touch-title{font-size:1.15rem;font-weight:800;color:var(--text);text-align:center;}
+.touch-sub{font-size:0.8rem;color:var(--text-light);text-align:center;max-width:255px;line-height:1.6;}
+.heart-btn{width:165px;height:165px;background:radial-gradient(circle at 40% 40%,#ffb3c6,var(--pink-deep));border:none;border-radius:50%;font-size:4.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 40px rgba(232,83,122,0.5);transition:transform 0.15s;animation:pulse-ring 2s ease-in-out infinite;}
+@keyframes pulse-ring{0%,100%{box-shadow:0 8px 40px rgba(232,83,122,0.5),0 0 0 0 rgba(232,83,122,0.3);}50%{box-shadow:0 8px 40px rgba(232,83,122,0.5),0 0 0 20px rgba(232,83,122,0);}}
+.heart-btn:active{transform:scale(0.88);}
+.touch-history{padding:0 18px;display:flex;flex-direction:column;gap:7px;width:100%;max-width:360px;}
+.touch-item{background:white;border-radius:13px;padding:10px 13px;font-size:0.8rem;font-weight:700;color:var(--text-light);box-shadow:0 2px 8px rgba(255,133,161,0.15);animation:msgIn 0.3s ease;}
 
-  .quick-msgs { padding:0 20px; display:flex; flex-direction:column; gap:8px; }
-  .quick-msg-btn {
-    background:white; border:none; border-radius:16px; padding:14px 16px;
-    font-size:0.9rem; font-weight:700; color:var(--text); cursor:pointer;
-    text-align:left; display:flex; align-items:center; gap:10px;
-    box-shadow:0 2px 12px rgba(255,133,161,0.15); transition:all 0.2s;
-    font-family:'Nunito',sans-serif;
-  }
-  .quick-msg-btn:active { transform:scale(0.98); background:var(--pink-pale); }
+/* SETTINGS */
+.settings-section{padding:13px 18px 5px;}
+.settings-card{background:white;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);}
+.settings-row{display:flex;align-items:center;gap:11px;padding:14px;border-bottom:1px solid var(--pink-pale);cursor:pointer;transition:background 0.2s;}
+.settings-row:last-child{border-bottom:none;}
+.settings-row:active{background:var(--pink-pale);}
+.settings-icon{width:34px;height:34px;background:var(--pink-pale);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.settings-label{font-size:0.85rem;font-weight:700;color:var(--text);flex:1;}
+.settings-value{font-size:0.75rem;color:var(--text-light);font-weight:600;}
+.lang-toggle-row{display:flex;gap:8px;padding:13px 18px 0;}
+.lang-toggle-btn{flex:1;padding:10px;border-radius:13px;border:2.5px solid var(--pink-mid);background:white;font-size:0.88rem;font-weight:800;color:var(--text-light);cursor:pointer;font-family:'Nunito',sans-serif;transition:all 0.2s;text-align:center;}
+.lang-toggle-btn.active{border-color:var(--pink-deep);background:var(--pink-pale);color:var(--pink-deep);}
 
-  /* CHAT */
-  .chat-header {
-    padding:16px 20px; text-align:center; font-size:1rem; font-weight:800; color:var(--text);
-    background:rgba(255,255,255,0.75); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
-    border-bottom:1px solid rgba(255,133,161,0.15);
-  }
-  .chat-messages { padding:16px 16px 0; display:flex; flex-direction:column; gap:10px; min-height:calc(100vh - 280px); }
-  .msg-date { text-align:center; font-size:0.75rem; color:var(--text-light); font-weight:600; margin:8px 0; }
-  .msg {
-    max-width:75%; padding:10px 14px; border-radius:18px;
-    font-size:0.9rem; font-weight:600; line-height:1.4;
-    animation:msgIn 0.3s ease;
-  }
-  @keyframes msgIn { from{opacity:0;transform:translateY(10px) scale(0.95);} to{opacity:1;transform:translateY(0) scale(1);} }
-  .msg-time { font-size:0.65rem; opacity:0.7; margin-top:3px; display:block; }
-  .msg.them { background:white; color:var(--text); align-self:flex-start; border-bottom-left-radius:4px; box-shadow:0 2px 8px rgba(255,133,161,0.15); }
-  .msg.me { background:linear-gradient(135deg,var(--pink),var(--pink-deep)); color:white; align-self:flex-end; border-bottom-right-radius:4px; }
-  .msg.me .msg-time { text-align:right; }
-  .msg-heart { align-self:flex-end; font-size:3rem; filter:drop-shadow(0 4px 12px rgba(255,133,161,0.5)); animation:heartbeat 1.5s ease-in-out infinite; }
-  .msg-heart.them { align-self:flex-start; }
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(255,255,255,0.93);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,133,161,0.2);display:flex;padding:6px 0 26px;z-index:100;}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;cursor:pointer;padding:5px 0;font-family:'Nunito',sans-serif;}
+.nav-btn:active{transform:scale(0.9);}
+.nav-icon{font-size:1.4rem;transition:all 0.2s;}
+.nav-label{font-size:0.61rem;font-weight:700;color:var(--text-light);transition:color 0.2s;}
+.nav-btn.active .nav-label{color:var(--pink-deep);}
+.nav-center-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--pink-light),var(--pink));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.45rem;box-shadow:0 4px 16px rgba(255,133,161,0.4);transition:all 0.2s;margin-top:-7px;}
+.notif-badge{position:absolute;top:-2px;right:-2px;width:9px;height:9px;background:var(--pink-deep);border-radius:50%;border:2px solid white;display:none;}
+.nav-icon-wrap{position:relative;display:inline-block;}
 
-  .chat-input-area {
-    position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
-    width:100%; max-width:430px; padding:10px 16px;
-    background:rgba(255,255,255,0.92); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
-    border-top:1px solid rgba(255,133,161,0.15);
-    display:flex; gap:8px; align-items:center;
-  }
-  .chat-input {
-    flex:1; background:var(--pink-pale); border:none; border-radius:20px;
-    padding:10px 16px; font-size:0.9rem; font-family:'Nunito',sans-serif; color:var(--text); outline:none;
-  }
-  .chat-input::placeholder { color:var(--text-light); }
-  .send-btn {
-    width:40px; height:40px; background:linear-gradient(135deg,var(--pink),var(--pink-deep));
-    border:none; border-radius:50%; font-size:1.1rem; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 4px 12px rgba(232,83,122,0.4); transition:transform 0.2s;
-  }
-  .send-btn:active { transform:scale(0.9); }
-  .chat-extra-btn {
-    width:36px; height:36px; background:var(--pink-pale); border:none;
-    border-radius:50%; font-size:1rem; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-  }
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(90,45,58,0.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:white;border-radius:28px 28px 0 0;padding:24px 20px 44px;width:100%;max-width:430px;animation:slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.modal-title{font-size:1.02rem;font-weight:800;color:var(--text);margin-bottom:16px;}
+.modal-input{width:100%;background:var(--pink-pale);border:2px solid var(--pink-mid);border-radius:13px;padding:11px 13px;font-size:1rem;font-family:'Nunito',sans-serif;color:var(--text);outline:none;margin-bottom:11px;}
+.modal-input:focus{border-color:var(--pink);}
+.modal-save{width:100%;background:linear-gradient(135deg,var(--pink),var(--pink-deep));border:none;border-radius:13px;padding:13px;font-size:0.95rem;font-weight:800;color:white;cursor:pointer;font-family:'Nunito',sans-serif;box-shadow:0 4px 16px rgba(232,83,122,0.4);}
+.modal-cancel{width:100%;background:var(--pink-pale);border:none;border-radius:13px;padding:11px;font-size:0.85rem;font-weight:700;color:var(--text-light);cursor:pointer;font-family:'Nunito',sans-serif;margin-top:7px;}
 
-  /* TOUCH */
-  .touch-page {
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    min-height:calc(100vh - 170px); padding:20px; gap:24px;
-  }
-  .touch-title { font-size:1.2rem; font-weight:800; color:var(--text); text-align:center; }
-  .touch-sub { font-size:0.85rem; color:var(--text-light); text-align:center; max-width:260px; line-height:1.6; }
-  .heart-btn {
-    width:180px; height:180px;
-    background:radial-gradient(circle at 40% 40%, #ffb3c6, var(--pink-deep));
-    border:none; border-radius:50%; font-size:5rem; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 8px 40px rgba(232,83,122,0.5); transition:transform 0.15s;
-    animation:pulse-ring 2s ease-in-out infinite;
-  }
-  @keyframes pulse-ring {
-    0%,100%{box-shadow:0 8px 40px rgba(232,83,122,0.5),0 0 0 0 rgba(232,83,122,0.3);}
-    50%{box-shadow:0 8px 40px rgba(232,83,122,0.5),0 0 0 24px rgba(232,83,122,0);}
-  }
-  .heart-btn:active { transform:scale(0.88); }
-  .touch-history { padding:0 20px; display:flex; flex-direction:column; gap:8px; width:100%; max-width:360px; }
-  .touch-item {
-    background:white; border-radius:14px; padding:12px 16px;
-    font-size:0.85rem; font-weight:700; color:var(--text-light);
-    box-shadow:0 2px 8px rgba(255,133,161,0.15);
-    animation:msgIn 0.3s ease;
-  }
-
-  /* SETTINGS */
-  .settings-section { padding:16px 20px 8px; }
-  .settings-card { background:white; border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); }
-  .settings-row {
-    display:flex; align-items:center; gap:14px; padding:16px;
-    border-bottom:1px solid var(--pink-pale); cursor:pointer; transition:background 0.2s;
-  }
-  .settings-row:last-child { border-bottom:none; }
-  .settings-row:active { background:var(--pink-pale); }
-  .settings-icon { width:38px; height:38px; background:var(--pink-pale); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
-  .settings-label { font-size:0.9rem; font-weight:700; color:var(--text); flex:1; }
-  .settings-value { font-size:0.8rem; color:var(--text-light); font-weight:600; }
-
-  /* MODALS */
-  .modal-overlay {
-    position:fixed; inset:0; background:rgba(90,45,58,0.4);
-    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
-    z-index:200; display:none; align-items:flex-end; justify-content:center;
-  }
-  .modal-overlay.open { display:flex; }
-  .modal {
-    background:white; border-radius:28px 28px 0 0; padding:28px 24px 48px;
-    width:100%; max-width:430px; animation:slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1);
-  }
-  @keyframes slideUp { from{transform:translateY(100%);} to{transform:translateY(0);} }
-  .modal-title { font-size:1.1rem; font-weight:800; color:var(--text); margin-bottom:20px; }
-  .modal-input {
-    width:100%; background:var(--pink-pale); border:2px solid var(--pink-mid);
-    border-radius:14px; padding:12px 16px; font-size:1rem;
-    font-family:'Nunito',sans-serif; color:var(--text); outline:none; margin-bottom:14px;
-  }
-  .modal-input:focus { border-color:var(--pink); }
-  .modal-save {
-    width:100%; background:linear-gradient(135deg,var(--pink),var(--pink-deep));
-    border:none; border-radius:14px; padding:14px; font-size:1rem; font-weight:800;
-    color:white; cursor:pointer; font-family:'Nunito',sans-serif;
-    box-shadow:0 4px 16px rgba(232,83,122,0.4);
-  }
-  .modal-cancel {
-    width:100%; background:var(--pink-pale); border:none; border-radius:14px;
-    padding:12px; font-size:0.9rem; font-weight:700; color:var(--text-light);
-    cursor:pointer; font-family:'Nunito',sans-serif; margin-top:8px;
-  }
-
-  /* BOTTOM NAV */
-  .bottom-nav {
-    position:fixed; bottom:0; left:50%; transform:translateX(-50%);
-    width:100%; max-width:430px;
-    background:rgba(255,255,255,0.92); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
-    border-top:1px solid rgba(255,133,161,0.2);
-    display:flex; padding:8px 0 28px; z-index:100;
-  }
-  .nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:none; cursor:pointer; padding:6px 0; transition:transform 0.2s; font-family:'Nunito',sans-serif; }
-  .nav-btn:active { transform:scale(0.9); }
-  .nav-icon { font-size:1.5rem; transition:all 0.2s; }
-  .nav-label { font-size:0.65rem; font-weight:700; color:var(--text-light); transition:color 0.2s; }
-  .nav-btn.active .nav-label { color:var(--pink-deep); }
-  .nav-center-icon {
-    width:48px; height:48px;
-    background:linear-gradient(135deg,var(--pink-light),var(--pink));
-    border-radius:50%; display:flex; align-items:center; justify-content:center;
-    font-size:1.6rem; box-shadow:0 4px 16px rgba(255,133,161,0.4);
-    transition:all 0.2s; margin-top:-8px;
-  }
-
-  /* NOTIFICATION BADGE */
-  .notif-badge {
-    position:absolute; top:-2px; right:-2px; width:10px; height:10px;
-    background:var(--pink-deep); border-radius:50%; border:2px solid white;
-    display:none;
-  }
-  .nav-icon-wrap { position:relative; display:inline-block; }
-
-  .toast {
-    position:fixed; top:80px; left:50%; transform:translateX(-50%) translateY(-20px);
-    background:var(--text); color:white; padding:10px 20px; border-radius:20px;
-    font-size:0.85rem; font-weight:700; opacity:0; transition:all 0.3s;
-    z-index:300; white-space:nowrap;
-  }
-  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-
-  /* TOUCH RIPPLE */
-  .touch-ripple {
-    position:fixed; border-radius:50%;
-    background:rgba(232,83,122,0.3); pointer-events:none; z-index:400;
-    animation:ripple 0.8s ease-out forwards;
-  }
-  @keyframes ripple { 0%{width:0;height:0;opacity:0.6;} 100%{width:200px;height:200px;opacity:0;} }
+.toast{position:fixed;top:78px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--text);color:white;padding:9px 18px;border-radius:20px;font-size:0.8rem;font-weight:700;opacity:0;transition:all 0.3s;z-index:300;white-space:nowrap;max-width:90vw;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.touch-ripple{position:fixed;border-radius:50%;margin-left:-100px;margin-top:-100px;background:rgba(232,83,122,0.3);pointer-events:none;z-index:400;animation:ripple 0.8s ease-out forwards;}
+@keyframes ripple{0%{width:0;height:0;opacity:0.6;}100%{width:200px;height:200px;opacity:0;}}
 </style>
 </head>
 <body>
-
 <div class="hearts-bg" id="heartsBg"></div>
 
-<!-- ═══ SETUP SCREEN ═══ -->
+<!-- SETUP -->
 <div class="setup-screen" id="setupScreen">
-  <div class="setup-logo">💕 Confortul Nostru</div>
-  <p class="setup-sub">Aplicația pentru voi doi 🌸<br>Sincronizare în timp real</p>
+  <div class="setup-logo">💕</div>
+  <div class="setup-title" id="setup-title">Confortul Nostru</div>
+  <p class="setup-sub" id="setup-sub">Aplicația pentru voi doi 🌸<br>Sincronizare în timp real</p>
 
   <div class="setup-card">
-    <div class="setup-label">CINE EȘTI TU?</div>
-    <div class="setup-role-btns">
-      <button class="role-btn active" id="roleBtn1" onclick="selectRole('partner1')">Partener 1 👤</button>
-      <button class="role-btn" id="roleBtn2" onclick="selectRole('partner2')">Partener 2 💕</button>
+    <div class="setup-label">LIMBA / ЯЗЫК</div>
+    <div class="two-btns">
+      <button class="half-btn active" id="sLangRo" onclick="setSetupLang('ro')">🇷🇴 Română</button>
+      <button class="half-btn" id="sLangRu" onclick="setSetupLang('ru')">🇷🇺 Русский</button>
     </div>
-    <div class="setup-label">NUMELE TĂU</div>
-    <input class="setup-input" id="setupName" type="text" placeholder="ex: Ana, Mihai..." maxlength="20" />
-    <div class="setup-label">NUMELE PARTENERULUI</div>
-    <input class="setup-input" id="setupPartnerName" type="text" placeholder="ex: Mihai, Ana..." maxlength="20" />
-    <div class="setup-label">COD CUPLU (același pentru amândoi!)</div>
-    <input class="setup-input" id="setupCode" type="text" placeholder="ex: ana-si-mihai-2024" maxlength="30" style="text-transform:lowercase;" />
-    <button class="setup-btn" onclick="startApp()">💕 Intră în aplicație</button>
-  </div>
 
-  <div class="setup-firebase-note">
-    <strong>⚠️ Pasul 1:</strong> Editează fișierul HTML și înlocuiește <strong>firebaseConfig</strong> cu datele tale din Firebase Console.<br><br>
-    <strong>📋 Cum creezi Firebase gratuit:</strong><br>
-    1. Mergi la <strong>console.firebase.google.com</strong><br>
-    2. Creează proiect nou<br>
-    3. Activează <strong>Realtime Database</strong><br>
-    4. Copiază config în fișier<br>
-    5. Setează regulile la: <strong>true</strong> (pentru test)
+    <div class="setup-label" id="sl-who">CINE EȘTI TU?</div>
+    <div class="two-btns">
+      <button class="half-btn active" id="roleBtn1" onclick="selectRole('partner1')">Partener 1 👤</button>
+      <button class="half-btn" id="roleBtn2" onclick="selectRole('partner2')">Partener 2 💕</button>
+    </div>
+
+    <div class="setup-label" id="sl-myname">NUMELE TĂU</div>
+    <input class="setup-input" id="setupName" type="text" placeholder="ex: Ana, Mihai..." maxlength="20"/>
+    <div class="setup-label" id="sl-partname">NUMELE PARTENERULUI</div>
+    <input class="setup-input" id="setupPartnerName" type="text" placeholder="ex: Mihai, Ana..." maxlength="20"/>
+    <div class="setup-label" id="sl-code">COD CUPLU (același pentru amândoi!)</div>
+    <input class="setup-input" id="setupCode" type="text" placeholder="ex: bogdan-si-masha-2024" maxlength="30" style="text-transform:lowercase;"/>
+    <button class="setup-btn" id="sl-enter" onclick="startApp()">💕 Intră în aplicație</button>
   </div>
 </div>
 
-<!-- ═══ MAIN APP ═══ -->
+<!-- MAIN APP -->
 <div class="app" id="mainApp" style="display:none;">
   <div class="topbar">
     <div class="topbar-icon" onclick="openDatePicker()">📅</div>
     <div class="topbar-title">
-      Confortul Nostru
+      <span id="appTitle">Confortul Nostru</span>
       <span class="sync-dot" id="syncDot"></span>
     </div>
-    <div class="topbar-icon" onclick="showPage('settings')">⚙️</div>
+    <div class="topbar-actions">
+      <button class="topbar-icon" id="langToggleBtn" onclick="toggleLang()">RU</button>
+      <button class="topbar-icon" onclick="showPage('settings')">⚙️</button>
+    </div>
   </div>
 
   <!-- HOME -->
@@ -421,64 +221,68 @@
       <div class="couple-avatars">
         <div class="avatar-wrap">
           <div class="avatar">😊</div>
-          <div class="avatar-name" id="nameMe">Tu</div>
-          <div class="avatar-status-badge" id="statusMeBadge">Selectează status</div>
+          <div class="avatar-name" id="nameMe">—</div>
+          <div class="avatar-status-badge" id="statusMeBadge">—</div>
         </div>
         <div class="heart-connector"><span>💗</span></div>
         <div class="avatar-wrap">
           <div class="avatar">🥰</div>
-          <div class="avatar-name" id="namePartner">Iubire</div>
+          <div class="avatar-name" id="namePartner">—</div>
           <div class="avatar-status-badge" id="statusPartnerBadge">—</div>
         </div>
       </div>
     </div>
 
     <div class="countdown-card">
-      <div class="countdown-label">Până la întâlnirea noastră 💗</div>
-      <div class="countdown-days" id="cdDays">--</div>
-      <div class="countdown-unit">zile</div>
-      <div class="countdown-time">
-        <div class="time-block"><span class="time-num" id="cdH">--</span><span class="time-lbl">ore</span></div>
-        <div class="time-block"><span class="time-num" id="cdM">--</span><span class="time-lbl">minute</span></div>
-        <div class="time-block"><span class="time-num" id="cdS">--</span><span class="time-lbl">secunde</span></div>
+      <div class="cd-label" id="t-cd-label">Până la întâlnirea noastră 💗</div>
+      <div class="cd-days" id="cdDays">--</div>
+      <div class="cd-unit" id="t-days">zile</div>
+      <div class="cd-time">
+        <div class="time-block"><span class="time-num" id="cdH">--</span><span class="time-lbl" id="t-h">ore</span></div>
+        <div class="time-block"><span class="time-num" id="cdM">--</span><span class="time-lbl" id="t-m">minute</span></div>
+        <div class="time-block"><span class="time-num" id="cdS">--</span><span class="time-lbl" id="t-s">secunde</span></div>
       </div>
-      <div class="countdown-date" id="cdDateLabel">📅 Setează data întâlnirii</div>
-      <div class="countdown-quote">Distanța este doar o dovadă că dragostea poate călători 💕</div>
-      <button class="edit-date-btn" onclick="openDatePicker()">✏️ Schimbă data</button>
+      <div class="cd-date" id="cdDateLabel">—</div>
+      <div class="cd-quote" id="t-quote">Distanța este doar o dovadă că dragostea poate călători 💕</div>
+      <button class="edit-date-btn" id="t-edit-date" onclick="openDatePicker()">✏️ Schimbă data</button>
     </div>
 
-    <div class="section-title">Cum te simți? 💭</div>
+    <div class="section-title" id="t-status-title">Cum te simți? 💭</div>
     <div class="status-grid">
-      <button class="status-btn" onclick="setStatus(this,'Fericită 😊')">Fericită 😊</button>
-      <button class="status-btn" onclick="setStatus(this,'Îmi ești dor 😢')">Îmi ești dor 😢</button>
-      <button class="status-btn" onclick="setStatus(this,'Te iubesc ❤️')">Te iubesc ❤️</button>
-      <button class="status-btn" onclick="setStatus(this,'Obosit/ă 😴')">Obosit/ă 😴</button>
-      <button class="status-btn" onclick="setStatus(this,'Ocupat/ă 💼')">Ocupat/ă 💼</button>
-      <button class="status-btn" onclick="setStatus(this,'Trist/ă 😔')">Trist/ă 😔</button>
-      <button class="status-btn" onclick="setStatus(this,'Mă gândesc la tine 🌙')">Mă gândesc 🌙</button>
-      <button class="status-btn" onclick="setStatus(this,'Am nevoie de tine 🤗')">Am nevoie 🤗</button>
+      <button class="status-btn" data-ro="Fericită 😊" data-ru="Счастлива 😊" onclick="setStatusBtn(this)">Fericită 😊</button>
+      <button class="status-btn" data-ro="Îmi ești dor 😢" data-ru="Скучаю по тебе 😢" onclick="setStatusBtn(this)">Îmi ești dor 😢</button>
+      <button class="status-btn" data-ro="Te iubesc ❤️" data-ru="Люблю тебя ❤️" onclick="setStatusBtn(this)">Te iubesc ❤️</button>
+      <button class="status-btn" data-ro="Obosit/ă 😴" data-ru="Устала 😴" onclick="setStatusBtn(this)">Obosit/ă 😴</button>
+      <button class="status-btn" data-ro="Ocupat/ă 💼" data-ru="Занята 💼" onclick="setStatusBtn(this)">Ocupat/ă 💼</button>
+      <button class="status-btn" data-ro="Trist/ă 😔" data-ru="Грустно 😔" onclick="setStatusBtn(this)">Trist/ă 😔</button>
+      <button class="status-btn" data-ro="Mă gândesc la tine 🌙" data-ru="Думаю о тебе 🌙" onclick="setStatusBtn(this)">Mă gândesc 🌙</button>
+      <button class="status-btn" data-ro="Am nevoie de tine 🤗" data-ru="Нужна ты мне 🤗" onclick="setStatusBtn(this)">Am nevoie 🤗</button>
     </div>
 
-    <div class="section-title">Mesaje rapide ⚡</div>
+    <div class="section-title" id="t-quick-title">Mesaje rapide ⚡</div>
     <div class="quick-msgs">
-      <button class="quick-msg-btn" onclick="sendQuick('💕 Îmi ești dor de tine')">💕 Îmi ești dor de tine</button>
-      <button class="quick-msg-btn" onclick="sendQuick('📞 Sună-mă')">📞 Sună-mă</button>
-      <button class="quick-msg-btn" onclick="sendQuick('🌙 Noapte bună, dragostea mea')">🌙 Noapte bună, dragostea mea</button>
-      <button class="quick-msg-btn" onclick="sendQuick('💭 Mă gândesc la tine')">💭 Mă gândesc la tine</button>
-      <button class="quick-msg-btn" onclick="sendQuick('❤️ Te iubesc')">❤️ Te iubesc</button>
-      <button class="quick-msg-btn" onclick="sendQuick('🌟 Ești cel mai bun/bună')">🌟 Ești cel mai bun/bună</button>
+      <button class="quick-msg-btn" data-ro="💕 Îmi ești dor de tine" data-ru="💕 Скучаю по тебе" onclick="sendQuickLang(this)">💕 Îmi ești dor de tine</button>
+      <button class="quick-msg-btn" data-ro="📞 Sună-mă" data-ru="📞 Позвони мне" onclick="sendQuickLang(this)">📞 Sună-mă</button>
+      <button class="quick-msg-btn" data-ro="🌙 Noapte bună, dragostea mea" data-ru="🌙 Спокойной ночи, моя любовь" onclick="sendQuickLang(this)">🌙 Noapte bună, dragostea mea</button>
+      <button class="quick-msg-btn" data-ro="💭 Mă gândesc la tine" data-ru="💭 Думаю о тебе" onclick="sendQuickLang(this)">💭 Mă gândesc la tine</button>
+      <button class="quick-msg-btn" data-ro="❤️ Te iubesc" data-ru="❤️ Я тебя люблю" onclick="sendQuickLang(this)">❤️ Te iubesc</button>
+      <button class="quick-msg-btn" data-ro="🌟 Ești cel mai bun/bună" data-ru="🌟 Ты самый лучший/лучшая" onclick="sendQuickLang(this)">🌟 Ești cel mai bun/bună</button>
+      <button class="quick-msg-btn" data-ro="☀️ Bună dimineața, dragule" data-ru="☀️ Доброе утро, родной/родная" onclick="sendQuickLang(this)">☀️ Bună dimineața, dragule</button>
+      <button class="quick-msg-btn" data-ro="🫶 Ești totul pentru mine" data-ru="🫶 Ты всё для меня" onclick="sendQuickLang(this)">🫶 Ești totul pentru mine</button>
     </div>
-    <div style="height:16px;"></div>
+    <div style="height:14px;"></div>
   </div>
 
   <!-- CHAT -->
   <div class="page" id="page-chat">
-    <div class="chat-header">💬 Doar noi doi</div>
-    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-header" id="t-chat-header">💬 Doar noi doi</div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="msg-date" id="t-today">Azi</div>
+    </div>
     <div class="chat-input-area">
       <button class="chat-extra-btn" onclick="addEmoji()">😊</button>
       <button class="chat-extra-btn" onclick="sendHeart()">💗</button>
-      <input class="chat-input" id="chatInput" type="text" placeholder="Scrie ceva frumos..." />
+      <input class="chat-input" id="chatInput" type="text" placeholder="Scrie ceva frumos..."/>
       <button class="send-btn" onclick="sendMessage()">➤</button>
     </div>
   </div>
@@ -486,8 +290,8 @@
   <!-- TOUCH -->
   <div class="page" id="page-touch">
     <div class="touch-page">
-      <div class="touch-title">Trimite o atingere 💗</div>
-      <div class="touch-sub">Apasă pe inimă și partenerul tău va simți că te gândești la el/ea</div>
+      <div class="touch-title" id="t-touch-title">Trimite o atingere 💗</div>
+      <div class="touch-sub" id="t-touch-sub">Apasă pe inimă și partenerul tău va simți că te gândești la el/ea</div>
       <button class="heart-btn" id="heartBtn" onclick="sendTouch(event)">💗</button>
       <div class="touch-history" id="touchHistory"></div>
     </div>
@@ -496,21 +300,26 @@
   <!-- SETTINGS -->
   <div class="page" id="page-settings">
     <div class="settings-section">
-      <div class="section-title">Setări 💕</div>
+      <div class="section-title" id="t-settings-title">Setări 💕</div>
+      <div class="lang-toggle-row">
+        <button class="lang-toggle-btn active" id="langBtnRo" onclick="setLang('ro')">🇷🇴 Română</button>
+        <button class="lang-toggle-btn" id="langBtnRu" onclick="setLang('ru')">🇷🇺 Русский</button>
+      </div>
+      <div style="height:11px;"></div>
       <div class="settings-card">
         <div class="settings-row" onclick="openDatePicker()">
           <div class="settings-icon">📅</div>
-          <div class="settings-label">Data întâlnirii</div>
+          <div class="settings-label" id="t-meet-date">Data întâlnirii</div>
           <div class="settings-value" id="svDate">—</div>
         </div>
         <div class="settings-row" onclick="showInstallInstructions()">
           <div class="settings-icon">📱</div>
-          <div class="settings-label">Instalează pe iPhone</div>
+          <div class="settings-label" id="t-install">Instalează pe iPhone</div>
           <div class="settings-value">→</div>
         </div>
         <div class="settings-row" onclick="logout()">
           <div class="settings-icon">🚪</div>
-          <div class="settings-label">Schimbă profilul</div>
+          <div class="settings-label" id="t-logout">Schimbă profilul</div>
           <div class="settings-value">→</div>
         </div>
       </div>
@@ -519,18 +328,18 @@
       <div class="settings-card">
         <div class="settings-row">
           <div class="settings-icon">🔄</div>
-          <div class="settings-label">Sincronizare în timp real</div>
+          <div class="settings-label" id="t-sync">Sincronizare în timp real</div>
           <div class="settings-value" id="syncStatus">—</div>
         </div>
         <div class="settings-row">
           <div class="settings-icon">🔒</div>
-          <div class="settings-label">Cod cuplu</div>
+          <div class="settings-label" id="t-couple-code">Cod cuplu</div>
           <div class="settings-value" id="coupleCodeDisplay">—</div>
         </div>
       </div>
     </div>
-    <div style="padding:20px; text-align:center;">
-      <p style="font-size:0.8rem; color:var(--text-light); line-height:1.8;">
+    <div style="padding:18px;text-align:center;">
+      <p style="font-size:0.76rem;color:var(--text-light);line-height:1.8;" id="t-footer">
         Distanța nu desparte inimile,<br>
         <strong style="color:var(--pink-deep);">ea face dragostea mai puternică 💕</strong>
       </p>
@@ -541,358 +350,398 @@
 <!-- BOTTOM NAV -->
 <div class="bottom-nav" id="bottomNav" style="display:none;">
   <button class="nav-btn active" id="nav-home" onclick="showPage('home')">
-    <span class="nav-icon">🏠</span><span class="nav-label">Acasă</span>
+    <span class="nav-icon">🏠</span><span class="nav-label" id="t-nav-home">Acasă</span>
   </button>
   <button class="nav-btn" id="nav-chat" onclick="showPage('chat')">
-    <div class="nav-icon-wrap">
-      <span class="nav-icon">💬</span>
-      <div class="notif-badge" id="chatBadge"></div>
-    </div>
-    <span class="nav-label">Chat</span>
+    <div class="nav-icon-wrap"><span class="nav-icon">💬</span><div class="notif-badge" id="chatBadge"></div></div>
+    <span class="nav-label" id="t-nav-chat">Chat</span>
   </button>
   <button class="nav-btn" id="nav-touch" onclick="showPage('touch')">
     <div class="nav-center-icon">💗</div>
-    <span class="nav-label">Atingere</span>
+    <span class="nav-label" id="t-nav-touch">Atingere</span>
   </button>
   <button class="nav-btn" id="nav-settings" onclick="showPage('settings')">
-    <span class="nav-icon">⚙️</span><span class="nav-label">Setări</span>
+    <span class="nav-icon">⚙️</span><span class="nav-label" id="t-nav-settings">Setări</span>
   </button>
 </div>
 
 <!-- MODALS -->
 <div class="modal-overlay" id="modalDate">
   <div class="modal">
-    <div class="modal-title">📅 Data întâlnirii noastre</div>
-    <input class="modal-input" id="modalDateInput" type="date" />
-    <button class="modal-save" onclick="saveDate()">💕 Salvează</button>
-    <button class="modal-cancel" onclick="closeModal('modalDate')">Anulează</button>
+    <div class="modal-title" id="t-modal-date-title">📅 Data întâlnirii noastre</div>
+    <input class="modal-input" id="modalDateInput" type="date"/>
+    <button class="modal-save" id="t-modal-save" onclick="saveDate()">💕 Salvează</button>
+    <button class="modal-cancel" id="t-modal-cancel" onclick="closeModal('modalDate')">Anulează</button>
   </div>
 </div>
 
 <div class="modal-overlay" id="modalInstall">
   <div class="modal">
-    <div class="modal-title">📱 Instalează pe iPhone</div>
-    <p style="font-size:0.9rem; color:var(--text-light); line-height:1.8; margin-bottom:20px;">
+    <div class="modal-title" id="t-install-title">📱 Instalează pe iPhone</div>
+    <p id="t-install-steps" style="font-size:0.85rem;color:var(--text-light);line-height:1.9;margin-bottom:16px;">
       <strong style="color:var(--text);">1.</strong> Deschide în <strong>Safari</strong><br>
-      <strong style="color:var(--text);">2.</strong> Apasă <strong>Partajare</strong> (□↑) de jos<br>
+      <strong style="color:var(--text);">2.</strong> Apasă <strong>Partajare</strong> (□↑)<br>
       <strong style="color:var(--text);">3.</strong> <strong>"Adaugă la ecranul principal"</strong><br>
-      <strong style="color:var(--text);">4.</strong> Apasă <strong>"Adaugă"</strong> dreapta sus<br><br>
-      Gata! Apare ca orice aplicație 🌸
+      <strong style="color:var(--text);">4.</strong> Apasă <strong>"Adaugă"</strong><br><br>Gata! 🌸
     </p>
-    <button class="modal-save" onclick="closeModal('modalInstall')">Am înțeles! 💕</button>
+    <button class="modal-save" id="t-install-ok" onclick="closeModal('modalInstall')">Am înțeles! 💕</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script type="module">
-// Wait for firebase module
-await new Promise(r => setTimeout(r, 500));
-const { db, configured, ref, set, get, onValue, push, serverTimestamp } = window.__firebase;
+await new Promise(r => setTimeout(r, 600));
+const { db, ref, set, onValue, push } = window.__fb;
 
-// ── STATE ──
-let myRole = '', myName = '', partnerName = '', coupleCode = '';
-let currentPage = 'home';
-let chatPage = false;
-let unsubscribers = [];
+const TR = {
+  ro: {
+    appTitle:'Confortul Nostru',
+    setupSub:'Aplicația pentru voi doi 🌸\nSincronizare în timp real',
+    slWho:'CINE EȘTI TU?', slMyname:'NUMELE TĂU', slPartname:'NUMELE PARTENERULUI',
+    slCode:'COD CUPLU (același pentru amândoi!)', slEnter:'💕 Intră în aplicație',
+    setupNamePh:'ex: Ana, Mihai...', setupPartnerPh:'ex: Mihai, Ana...', setupCodePh:'ex: bogdan-si-masha-2024',
+    role1:'Partener 1 👤', role2:'Partener 2 💕',
+    cdLabel:'Până la întâlnirea noastră 💗',
+    days:'zile', h:'ore', m:'minute', s:'secunde',
+    quote:'Distanța este doar o dovadă că dragostea poate călători 💕',
+    editDate:'✏️ Schimbă data',
+    statusTitle:'Cum te simți? 💭', quickTitle:'Mesaje rapide ⚡',
+    chatHeader:'💬 Doar noi doi', today:'Azi',
+    touchTitle:'Trimite o atingere 💗',
+    touchSub:'Apasă pe inimă și partenerul tău va simți că te gândești la el/ea',
+    settingsTitle:'Setări 💕', meetDate:'Data întâlnirii',
+    install:'Instalează pe iPhone', logout:'Schimbă profilul',
+    sync:'Sincronizare în timp real', coupleCode:'Cod cuplu',
+    footer:'Distanța nu desparte inimile,\nea face dragostea mai puternică 💕',
+    navHome:'Acasă', navChat:'Chat', navTouch:'Atingere', navSettings:'Setări',
+    modalDateTitle:'📅 Data întâlnirii noastre', modalSave:'💕 Salvează', modalCancel:'Anulează',
+    installTitle:'📱 Instalează pe iPhone',
+    installSteps:'<strong style="color:var(--text);">1.</strong> Deschide în <strong>Safari</strong><br><strong style="color:var(--text);">2.</strong> Apasă <strong>Partajare</strong> (□↑)<br><strong style="color:var(--text);">3.</strong> <strong>"Adaugă la ecranul principal"</strong><br><strong style="color:var(--text);">4.</strong> Apasă <strong>"Adaugă"</strong><br><br>Gata! 🌸',
+    installOk:'Am înțeles! 💕',
+    chatPh:'Scrie ceva frumos...', cdSet:'📅 Setează data întâlnirii',
+    statusSelect:'Selectează status', langToggle:'RU',
+    toastStatus:'Status actualizat! 💕', toastTouch:'Atingere trimisă! 💗',
+    toastDate:'Data salvată! 📅', toastMsg:'Mesaj trimis! 💕',
+    syncOn:'🟢 Conectat', syncOff:'🔴 Offline',
+    months:['ian','feb','mar','apr','mai','iun','iul','aug','sep','oct','nov','dec']
+  },
+  ru: {
+    appTitle:'Наш Уют',
+    setupSub:'Приложение только для вас двоих 🌸\nСинхронизация в реальном времени',
+    slWho:'КТО ТЫ?', slMyname:'ТВОЁ ИМЯ', slPartname:'ИМЯ ПАРТНЁРА',
+    slCode:'КОД ПАРЫ (одинаковый для обоих!)', slEnter:'💕 Войти в приложение',
+    setupNamePh:'напр: Маша, Богдан...', setupPartnerPh:'напр: Богдан, Маша...', setupCodePh:'напр: bogdan-i-masha-2024',
+    role1:'Партнёр 1 👤', role2:'Партнёр 2 💕',
+    cdLabel:'До нашей встречи 💗',
+    days:'дней', h:'часов', m:'минут', s:'секунд',
+    quote:'Расстояние — лишь проверка, насколько далеко может путешествовать любовь 💕',
+    editDate:'✏️ Изменить дату',
+    statusTitle:'Как ты себя чувствуешь? 💭', quickTitle:'Быстрые сообщения ⚡',
+    chatHeader:'💬 Только мы двое', today:'Сегодня',
+    touchTitle:'Отправь прикосновение 💗',
+    touchSub:'Нажми на сердце и твой партнёр почувствует, что ты думаешь о нём/ней',
+    settingsTitle:'Настройки 💕', meetDate:'Дата встречи',
+    install:'Установить на iPhone', logout:'Сменить профиль',
+    sync:'Синхронизация в реальном времени', coupleCode:'Код пары',
+    footer:'Расстояние не разделяет сердца,\nоно делает любовь сильнее 💕',
+    navHome:'Главная', navChat:'Чат', navTouch:'Прикосновение', navSettings:'Настройки',
+    modalDateTitle:'📅 Дата нашей встречи', modalSave:'💕 Сохранить', modalCancel:'Отмена',
+    installTitle:'📱 Установить на iPhone',
+    installSteps:'<strong style="color:var(--text);">1.</strong> Открой в <strong>Safari</strong><br><strong style="color:var(--text);">2.</strong> Нажми <strong>Поделиться</strong> (□↑)<br><strong style="color:var(--text);">3.</strong> <strong>"На экран Домой"</strong><br><strong style="color:var(--text);">4.</strong> Нажми <strong>"Добавить"</strong><br><br>Готово! 🌸',
+    installOk:'Понятно! 💕',
+    chatPh:'Напиши что-нибудь красивое...', cdSet:'📅 Установи дату встречи',
+    statusSelect:'Выбери статус', langToggle:'RO',
+    toastStatus:'Статус обновлён! 💕', toastTouch:'Прикосновение отправлено! 💗',
+    toastDate:'Дата сохранена! 📅', toastMsg:'Сообщение отправлено! 💕',
+    syncOn:'🟢 Подключено', syncOff:'🔴 Оффлайн',
+    months:['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек']
+  }
+};
 
-// ── FLOATING HEARTS ──
-const bg = document.getElementById('heartsBg');
-['💕','💗','💖','🌸','✨','💝','🌺'].forEach((e,i) => {
+let lang='ro', myRole='', myName='', partnerName='', coupleCode='', setupLang_='ro', myRole_='partner1';
+let currentPage='home';
+
+// Floating hearts
+const bg=document.getElementById('heartsBg');
+['💕','💗','💖','🌸','✨','💝','🌺'].forEach(e=>{
   for(let j=0;j<3;j++){
-    const s = document.createElement('span');
-    s.textContent = e;
-    s.style.left = Math.random()*100+'%';
-    s.style.animationDuration = (9+Math.random()*10)+'s';
-    s.style.animationDelay = (Math.random()*15)+'s';
-    s.style.fontSize = (0.8+Math.random()*1)+'rem';
+    const s=document.createElement('span');
+    s.textContent=e; s.style.left=Math.random()*100+'%';
+    s.style.animationDuration=(9+Math.random()*10)+'s';
+    s.style.animationDelay=(Math.random()*15)+'s';
+    s.style.fontSize=(0.8+Math.random()*1)+'rem';
     bg.appendChild(s);
   }
 });
 
-// ── ROLE SELECT ──
-window.selectRole = (role) => {
-  myRole = role;
-  document.getElementById('roleBtn1').classList.toggle('active', role==='partner1');
-  document.getElementById('roleBtn2').classList.toggle('active', role==='partner2');
+function t(key){ return TR[lang][key] || TR.ro[key] || key; }
+
+function applyLang(l) {
+  lang=l;
+  localStorage.setItem('comfort_lang', l);
+  const T=TR[l];
+
+  document.getElementById('appTitle').textContent=T.appTitle;
+  document.getElementById('langToggleBtn').textContent=T.langToggle;
+  document.getElementById('t-cd-label').textContent=T.cdLabel;
+  document.getElementById('t-days').textContent=T.days;
+  document.getElementById('t-h').textContent=T.h;
+  document.getElementById('t-m').textContent=T.m;
+  document.getElementById('t-s').textContent=T.s;
+  document.getElementById('t-quote').textContent=T.quote;
+  document.getElementById('t-edit-date').textContent=T.editDate;
+  document.getElementById('t-status-title').textContent=T.statusTitle;
+  document.getElementById('t-quick-title').textContent=T.quickTitle;
+  document.getElementById('t-chat-header').textContent=T.chatHeader;
+  document.getElementById('t-today').textContent=T.today;
+  document.getElementById('t-touch-title').textContent=T.touchTitle;
+  document.getElementById('t-touch-sub').textContent=T.touchSub;
+  document.getElementById('t-settings-title').textContent=T.settingsTitle;
+  document.getElementById('t-meet-date').textContent=T.meetDate;
+  document.getElementById('t-install').textContent=T.install;
+  document.getElementById('t-logout').textContent=T.logout;
+  document.getElementById('t-sync').textContent=T.sync;
+  document.getElementById('t-couple-code').textContent=T.coupleCode;
+  document.getElementById('t-nav-home').textContent=T.navHome;
+  document.getElementById('t-nav-chat').textContent=T.navChat;
+  document.getElementById('t-nav-touch').textContent=T.navTouch;
+  document.getElementById('t-nav-settings').textContent=T.navSettings;
+  document.getElementById('t-modal-date-title').textContent=T.modalDateTitle;
+  document.getElementById('t-modal-save').textContent=T.modalSave;
+  document.getElementById('t-modal-cancel').textContent=T.modalCancel;
+  document.getElementById('t-install-title').textContent=T.installTitle;
+  document.getElementById('t-install-steps').innerHTML=T.installSteps;
+  document.getElementById('t-install-ok').textContent=T.installOk;
+  document.getElementById('t-footer').innerHTML=T.footer.replace('\n','<br>');
+  document.getElementById('chatInput').placeholder=T.chatPh;
+  document.getElementById('syncStatus').textContent=db?T.syncOn:T.syncOff;
+
+  // Status buttons
+  document.querySelectorAll('.status-btn').forEach(btn=>{
+    const activeStatus=btn.classList.contains('active');
+    btn.textContent=btn.dataset[l]||btn.dataset.ro;
+    if(activeStatus) btn.classList.add('active');
+  });
+  // Quick msgs
+  document.querySelectorAll('.quick-msg-btn').forEach(btn=>{ btn.textContent=btn.dataset[l]||btn.dataset.ro; });
+
+  // Lang toggles in settings
+  document.getElementById('langBtnRo').classList.toggle('active',l==='ro');
+  document.getElementById('langBtnRu').classList.toggle('active',l==='ru');
+
+  // Update countdown date if set
+  const md=localStorage.getItem('meetDate');
+  if(md) updateDateDisplay(md);
+  else document.getElementById('cdDateLabel').textContent=T.cdSet;
+
+  // Update status badge placeholder if not set
+  const badge=document.getElementById('statusMeBadge');
+  if(!badge.dataset.set) badge.textContent=T.statusSelect;
+}
+
+window.toggleLang=()=>applyLang(lang==='ro'?'ru':'ro');
+window.setLang=(l)=>{ applyLang(l); saveLang(l); };
+
+function saveLang(l){
+  const saved=localStorage.getItem('comfort_profile');
+  if(saved){ const p=JSON.parse(saved); p.lang=l; localStorage.setItem('comfort_profile',JSON.stringify(p)); }
+}
+
+// Setup lang
+window.setSetupLang=(l)=>{
+  setupLang_=l;
+  document.getElementById('sLangRo').classList.toggle('active',l==='ro');
+  document.getElementById('sLangRu').classList.toggle('active',l==='ru');
+  const T=TR[l];
+  document.getElementById('setup-title').textContent=T.appTitle;
+  document.getElementById('setup-sub').innerHTML=T.setupSub.replace('\n','<br>');
+  document.getElementById('sl-who').textContent=T.slWho;
+  document.getElementById('sl-myname').textContent=T.slMyname;
+  document.getElementById('sl-partname').textContent=T.slPartname;
+  document.getElementById('sl-code').textContent=T.slCode;
+  document.getElementById('sl-enter').textContent=T.slEnter;
+  document.getElementById('setupName').placeholder=T.setupNamePh;
+  document.getElementById('setupPartnerName').placeholder=T.setupPartnerPh;
+  document.getElementById('setupCode').placeholder=T.setupCodePh;
+  document.getElementById('roleBtn1').textContent=T.role1;
+  document.getElementById('roleBtn2').textContent=T.role2;
 };
-selectRole('partner1');
 
-// ── START APP ──
-window.startApp = async () => {
-  const name = document.getElementById('setupName').value.trim();
-  const pName = document.getElementById('setupPartnerName').value.trim();
-  const code = document.getElementById('setupCode').value.trim().toLowerCase().replace(/\s+/g,'-');
-  if(!name||!pName||!code) { showToast('Completează toate câmpurile! 💕'); return; }
+window.selectRole=(role)=>{
+  myRole_=role;
+  document.getElementById('roleBtn1').classList.toggle('active',role==='partner1');
+  document.getElementById('roleBtn2').classList.toggle('active',role==='partner2');
+};
 
-  myName = name; partnerName = pName; coupleCode = code;
-  localStorage.setItem('comfort_profile', JSON.stringify({myRole, myName, partnerName, coupleCode}));
-
-  document.getElementById('setupScreen').style.display = 'none';
-  document.getElementById('mainApp').style.display = 'flex';
-  document.getElementById('bottomNav').style.display = 'flex';
-
+window.startApp=async()=>{
+  const name=document.getElementById('setupName').value.trim();
+  const pName=document.getElementById('setupPartnerName').value.trim();
+  const code=document.getElementById('setupCode').value.trim().toLowerCase().replace(/\s+/g,'-');
+  if(!name||!pName||!code){ showToast('⚠️ '+(setupLang_==='ro'?'Completează toate câmpurile!':'Заполни все поля!')); return; }
+  myRole=myRole_; myName=name; partnerName=pName; coupleCode=code; lang=setupLang_;
+  localStorage.setItem('comfort_profile',JSON.stringify({myRole,myName,partnerName,coupleCode,lang}));
+  document.getElementById('setupScreen').style.display='none';
+  document.getElementById('mainApp').style.display='flex';
+  document.getElementById('bottomNav').style.display='flex';
   initApp();
 };
 
-// ── INIT ──
-function initApp() {
-  document.getElementById('nameMe').textContent = myName;
-  document.getElementById('namePartner').textContent = partnerName;
-  document.getElementById('coupleCodeDisplay').textContent = coupleCode;
-
-  if(configured && db) {
-    document.getElementById('syncDot').classList.add('online');
-    document.getElementById('syncStatus').textContent = '🟢 Conectat';
-    listenToFirebase();
-  } else {
-    document.getElementById('syncStatus').textContent = '🔴 Offline (configurează Firebase)';
-    showToast('⚠️ Firebase neconfigurat — mod offline');
-    loadLocalData();
-  }
-  updateCountdown();
-  setInterval(updateCountdown, 1000);
-}
-
-// ── FIREBASE LISTENERS ──
-function listenToFirebase() {
-  const base = `couples/${coupleCode}`;
-
-  // Shared data (date, partner status)
-  onValue(ref(db, `${base}/shared`), snap => {
-    const d = snap.val() || {};
-    if(d.meetDate) {
-      localStorage.setItem('meetDate', d.meetDate);
-      updateDateDisplay(d.meetDate);
-    }
-    const partnerRole = myRole === 'partner1' ? 'partner2' : 'partner1';
-    const ps = d[`status_${partnerRole}`];
-    if(ps) document.getElementById('statusPartnerBadge').textContent = ps;
-  });
-
-  // Messages
-  onValue(ref(db, `${base}/messages`), snap => {
-    const msgs = snap.val();
-    if(!msgs) return;
-    const container = document.getElementById('chatMessages');
-    container.innerHTML = '';
-    Object.values(msgs).sort((a,b)=>a.ts-b.ts).forEach(m => {
-      const side = m.role === myRole ? 'me' : 'them';
-      appendMsgEl(m.text, side, m.time, m.isHeart);
-    });
-    if(currentPage !== 'chat') {
-      document.getElementById('chatBadge').style.display = 'block';
-    }
-  });
-
-  // Touch
-  onValue(ref(db, `${base}/touches`), snap => {
-    const touches = snap.val();
-    if(!touches) return;
-    const hist = document.getElementById('touchHistory');
-    hist.innerHTML = '';
-    const arr = Object.values(touches).sort((a,b)=>b.ts-a.ts).slice(0,5);
-    arr.forEach(t => {
-      const el = document.createElement('div');
-      el.className = 'touch-item';
-      el.textContent = `💗 ${t.senderName} a trimis o atingere — ${t.time}`;
-      hist.appendChild(el);
-    });
-  });
-}
-
-function loadLocalData() {
-  const md = localStorage.getItem('meetDate');
+function initApp(){
+  applyLang(lang);
+  document.getElementById('nameMe').textContent=myName;
+  document.getElementById('namePartner').textContent=partnerName;
+  document.getElementById('coupleCodeDisplay').textContent=coupleCode;
+  document.getElementById('statusMeBadge').textContent=TR[lang].statusSelect;
+  if(db){ document.getElementById('syncDot').classList.add('online'); listenFirebase(); }
+  const md=localStorage.getItem('meetDate');
   if(md) updateDateDisplay(md);
-  const msgs = JSON.parse(localStorage.getItem('comfort_msgs')||'[]');
-  msgs.forEach(m => appendMsgEl(m.text, m.side, m.time, m.isHeart));
+  updateCountdown();
+  setInterval(updateCountdown,1000);
 }
 
-// ── COUNTDOWN ──
-function updateCountdown() {
-  const meetDate = localStorage.getItem('meetDate');
-  if(!meetDate) return;
-  const target = new Date(meetDate+'T00:00:00');
-  const diff = target - new Date();
+function listenFirebase(){
+  const base=`couples/${coupleCode}`;
+  const partnerRole=myRole==='partner1'?'partner2':'partner1';
+  onValue(ref(db,`${base}/shared`),snap=>{
+    const d=snap.val()||{};
+    if(d.meetDate){ localStorage.setItem('meetDate',d.meetDate); updateDateDisplay(d.meetDate); }
+    const ps=d[`status_${partnerRole}`];
+    if(ps) document.getElementById('statusPartnerBadge').textContent=ps;
+  });
+  onValue(ref(db,`${base}/messages`),snap=>{
+    const msgs=snap.val();
+    const container=document.getElementById('chatMessages');
+    container.innerHTML=`<div class="msg-date">${TR[lang].today}</div>`;
+    if(!msgs) return;
+    Object.values(msgs).sort((a,b)=>a.ts-b.ts).forEach(m=>{
+      appendMsgEl(m.text,m.role===myRole?'me':'them',m.time,m.isHeart);
+    });
+    if(currentPage!=='chat') document.getElementById('chatBadge').style.display='block';
+  });
+  onValue(ref(db,`${base}/touches`),snap=>{
+    const touches=snap.val(); if(!touches) return;
+    const hist=document.getElementById('touchHistory');
+    hist.innerHTML='';
+    Object.values(touches).sort((a,b)=>b.ts-a.ts).slice(0,5).forEach(t=>{
+      const el=document.createElement('div'); el.className='touch-item';
+      el.textContent=`💗 ${t.senderName} — ${t.time}`; hist.appendChild(el);
+    });
+  });
+}
+
+function updateCountdown(){
+  const md=localStorage.getItem('meetDate'); if(!md) return;
+  const diff=new Date(md+'T00:00:00')-new Date();
   if(diff<=0){ document.getElementById('cdDays').textContent='🎉'; return; }
-  document.getElementById('cdDays').textContent = Math.floor(diff/86400000);
-  document.getElementById('cdH').textContent = String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
-  document.getElementById('cdM').textContent = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
-  document.getElementById('cdS').textContent = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+  document.getElementById('cdDays').textContent=Math.floor(diff/86400000);
+  document.getElementById('cdH').textContent=String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
+  document.getElementById('cdM').textContent=String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+  document.getElementById('cdS').textContent=String(Math.floor((diff%60000)/1000)).padStart(2,'0');
 }
 
-function updateDateDisplay(date) {
-  if(!date) return;
-  const d = new Date(date+'T00:00:00');
-  const months=['ian','feb','mar','apr','mai','iun','iul','aug','sep','oct','nov','dec'];
-  const label = `📅 ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
-  document.getElementById('cdDateLabel').textContent = label;
-  document.getElementById('svDate').textContent = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+function updateDateDisplay(date){
+  const d=new Date(date+'T00:00:00');
+  const m=TR[lang].months;
+  document.getElementById('cdDateLabel').textContent=`📅 ${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`;
+  document.getElementById('svDate').textContent=`${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
   updateCountdown();
 }
 
-// ── STATUS ──
-window.setStatus = (btn, status) => {
-  document.querySelectorAll('.status-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('statusMeBadge').textContent = status;
-  const key = `status_${myRole}`;
-  if(configured && db) {
-    set(ref(db, `couples/${coupleCode}/shared/${key}`), status);
-  } else {
-    localStorage.setItem('myStatus', status);
-  }
-  showToast('Status actualizat! 💕');
+window.setStatusBtn=(btn)=>{
+  document.querySelectorAll('.status-btn').forEach(b=>{ b.classList.remove('active'); delete b.dataset.set; });
+  btn.classList.add('active'); btn.dataset.set='1';
+  const status=btn.dataset[lang]||btn.dataset.ro;
+  const badge=document.getElementById('statusMeBadge');
+  badge.textContent=status; badge.dataset.set='1';
+  if(db) set(ref(db,`couples/${coupleCode}/shared/status_${myRole}`),status);
+  showToast(TR[lang].toastStatus);
 };
 
-// ── CHAT ──
-window.sendMessage = () => {
-  const input = document.getElementById('chatInput');
-  const text = input.value.trim();
-  if(!text) return;
-  input.value = '';
-  sendMsg(text, false);
+window.sendMessage=()=>{
+  const input=document.getElementById('chatInput');
+  const text=input.value.trim(); if(!text) return;
+  input.value=''; sendMsg(text,false);
 };
+window.sendHeart=()=>sendMsg('💗',true);
+window.sendQuickLang=(btn)=>{ sendMsg(btn.dataset[lang]||btn.dataset.ro,false); showPage('chat'); showToast(TR[lang].toastMsg); };
 
-window.sendHeart = () => sendMsg('💗', true);
-
-window.sendQuick = (msg) => {
-  sendMsg(msg, false);
-  showPage('chat');
-};
-
-function sendMsg(text, isHeart) {
-  const now = new Date();
-  const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  const msg = { text, time, role: myRole, isHeart, ts: Date.now() };
-
-  if(configured && db) {
-    push(ref(db, `couples/${coupleCode}/messages`), msg);
-  } else {
-    appendMsgEl(text, 'me', time, isHeart);
-    const msgs = JSON.parse(localStorage.getItem('comfort_msgs')||'[]');
-    msgs.push({text, side:'me', time, isHeart});
-    localStorage.setItem('comfort_msgs', JSON.stringify(msgs.slice(-100)));
-  }
+function sendMsg(text,isHeart){
+  const now=new Date();
+  const time=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  if(db){ push(ref(db,`couples/${coupleCode}/messages`),{text,time,role:myRole,isHeart,ts:Date.now()}); }
+  else { appendMsgEl(text,'me',time,isHeart); }
 }
 
-function appendMsgEl(text, side, time, isHeart) {
-  const container = document.getElementById('chatMessages');
-  if(isHeart || text === '💗') {
-    const el = document.createElement('div');
-    el.className = 'msg-heart'; el.textContent = '💗';
-    el.style.alignSelf = side==='me' ? 'flex-end' : 'flex-start';
-    container.appendChild(el);
+function appendMsgEl(text,side,time,isHeart){
+  const container=document.getElementById('chatMessages');
+  if(isHeart||text==='💗'){
+    const el=document.createElement('div'); el.className='msg-heart'; el.textContent='💗';
+    el.style.alignSelf=side==='me'?'flex-end':'flex-start'; container.appendChild(el);
   } else {
-    const el = document.createElement('div');
-    el.className = `msg ${side}`;
-    el.innerHTML = `${text}<span class="msg-time">${time}</span>`;
-    container.appendChild(el);
+    const el=document.createElement('div'); el.className=`msg ${side}`;
+    el.innerHTML=`${text}<span class="msg-time">${time}</span>`; container.appendChild(el);
   }
-  scrollChat();
+  setTimeout(()=>{ container.scrollTop=container.scrollHeight; },80);
 }
 
-function scrollChat() {
-  const c = document.getElementById('chatMessages');
-  setTimeout(()=>{ c.scrollTop = c.scrollHeight; }, 80);
-}
+window.addEmoji=()=>{
+  const emojis=['💕','🥰','😘','❤️','🌸','✨','💖','😊','🫶','🌹'];
+  const input=document.getElementById('chatInput');
+  input.value+=emojis[Math.floor(Math.random()*emojis.length)]; input.focus();
+};
+document.getElementById('chatInput').addEventListener('keydown',e=>{ if(e.key==='Enter') window.sendMessage(); });
 
-window.addEmoji = () => {
-  const emojis = ['💕','🥰','😘','❤️','🌸','✨','💖','😊','🫶'];
-  const input = document.getElementById('chatInput');
-  input.value += emojis[Math.floor(Math.random()*emojis.length)];
-  input.focus();
+window.sendTouch=(e)=>{
+  const btn=document.getElementById('heartBtn');
+  btn.style.transform='scale(0.85)'; setTimeout(()=>{btn.style.transform='';},200);
+  const ripple=document.createElement('div'); ripple.className='touch-ripple';
+  const rect=btn.getBoundingClientRect();
+  ripple.style.left=(rect.left+rect.width/2)+'px'; ripple.style.top=(rect.top+rect.height/2)+'px';
+  document.body.appendChild(ripple); setTimeout(()=>ripple.remove(),800);
+  const now=new Date();
+  const time=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  if(db) push(ref(db,`couples/${coupleCode}/touches`),{senderName:myName,role:myRole,time,ts:Date.now()});
+  showToast(TR[lang].toastTouch);
 };
 
-document.getElementById('chatInput').addEventListener('keydown', e => {
-  if(e.key==='Enter') window.sendMessage();
-});
-
-// ── TOUCH ──
-window.sendTouch = (e) => {
-  const btn = document.getElementById('heartBtn');
-  btn.style.transform = 'scale(0.85)';
-  setTimeout(()=>{ btn.style.transform=''; }, 200);
-
-  // Ripple
-  const ripple = document.createElement('div');
-  ripple.className = 'touch-ripple';
-  const rect = btn.getBoundingClientRect();
-  ripple.style.left = (rect.left + rect.width/2 - 0) + 'px';
-  ripple.style.top = (rect.top + rect.height/2 - 0) + 'px';
-  ripple.style.marginLeft = '-100px'; ripple.style.marginTop = '-100px';
-  document.body.appendChild(ripple);
-  setTimeout(()=>ripple.remove(), 800);
-
-  const now = new Date();
-  const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  const touch = { senderName: myName, role: myRole, time, ts: Date.now() };
-
-  if(configured && db) {
-    push(ref(db, `couples/${coupleCode}/touches`), touch);
-  }
-  showToast(`💗 Atingere trimisă, ${partnerName} a simțit!`);
-};
-
-// ── DATE ──
-window.openDatePicker = () => {
-  const md = localStorage.getItem('meetDate');
-  if(md) document.getElementById('modalDateInput').value = md;
+window.openDatePicker=()=>{
+  const md=localStorage.getItem('meetDate'); if(md) document.getElementById('modalDateInput').value=md;
   document.getElementById('modalDate').classList.add('open');
 };
-
-window.saveDate = () => {
-  const val = document.getElementById('modalDateInput').value;
-  if(!val) return;
-  localStorage.setItem('meetDate', val);
-  if(configured && db) set(ref(db, `couples/${coupleCode}/shared/meetDate`), val);
-  updateDateDisplay(val);
-  closeModal('modalDate');
-  showToast('Data salvată! 📅');
+window.saveDate=()=>{
+  const val=document.getElementById('modalDateInput').value; if(!val) return;
+  localStorage.setItem('meetDate',val);
+  if(db) set(ref(db,`couples/${coupleCode}/shared/meetDate`),val);
+  updateDateDisplay(val); closeModal('modalDate'); showToast(TR[lang].toastDate);
 };
 
-// ── NAVIGATION ──
-window.showPage = (name) => {
-  currentPage = name;
+window.showPage=(name)=>{
+  currentPage=name;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById(`page-${name}`).classList.add('active');
-  const nb = document.getElementById(`nav-${name}`);
-  if(nb) nb.classList.add('active');
-  if(name==='chat') {
-    document.getElementById('chatBadge').style.display = 'none';
-    scrollChat();
-  }
+  const nb=document.getElementById(`nav-${name}`); if(nb) nb.classList.add('active');
+  if(name==='chat'){ document.getElementById('chatBadge').style.display='none'; setTimeout(()=>{ const c=document.getElementById('chatMessages'); c.scrollTop=c.scrollHeight; },100); }
 };
 
-// ── MODALS ──
-window.closeModal = (id) => document.getElementById(id).classList.remove('open');
-window.showInstallInstructions = () => document.getElementById('modalInstall').classList.add('open');
-document.querySelectorAll('.modal-overlay').forEach(m => {
-  m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
-});
-
-// ── LOGOUT ──
-window.logout = () => {
-  localStorage.removeItem('comfort_profile');
-  location.reload();
+window.closeModal=(id)=>document.getElementById(id).classList.remove('open');
+window.showInstallInstructions=()=>document.getElementById('modalInstall').classList.add('open');
+document.querySelectorAll('.modal-overlay').forEach(m=>{ m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); }); });
+window.logout=()=>{ localStorage.removeItem('comfort_profile'); location.reload(); };
+window.showToast=(msg)=>{
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
 };
 
-// ── TOAST ──
-window.showToast = (msg) => {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2500);
-};
-
-// ── CHECK SAVED PROFILE ──
-const saved = localStorage.getItem('comfort_profile');
-if(saved) {
-  const p = JSON.parse(saved);
-  myRole = p.myRole; myName = p.myName; partnerName = p.partnerName; coupleCode = p.coupleCode;
-  document.getElementById('setupScreen').style.display = 'none';
-  document.getElementById('mainApp').style.display = 'flex';
-  document.getElementById('bottomNav').style.display = 'flex';
+// Load saved profile
+const saved=localStorage.getItem('comfort_profile');
+if(saved){
+  const p=JSON.parse(saved);
+  myRole=p.myRole; myName=p.myName; partnerName=p.partnerName; coupleCode=p.coupleCode; lang=p.lang||'ro';
+  document.getElementById('setupScreen').style.display='none';
+  document.getElementById('mainApp').style.display='flex';
+  document.getElementById('bottomNav').style.display='flex';
   initApp();
 }
 </script>
