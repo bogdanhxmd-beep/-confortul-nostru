@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Confortul Nostru">
+<meta name="theme-color" content="#ff85a1">
+<title>Confortul Nostru 💕</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Pacifico&display=swap" rel="stylesheet">
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, get, onValue, push, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  // ════════════════════════════════════════════
+  // 🔧 ÎNLOCUIEȘTE CU DATELE TALE FIREBASE AICI
+  // ════════════════════════════════════════════
+  const firebaseConfig = {
+    apiKey: "AIzaSyDvjfYXHEPvM7dUOWuvz6AfkKbFYNe5cbQ",
+    authDomain: "our-comfort.firebaseapp.com",
+    databaseURL: "https://our-comfort-default-rtdb.firebaseio.com",
+    projectId: "our-comfort",
+    storageBucket: "our-comfort.firebasestorage.app",
+    messagingSenderId: "224014412527",
+    appId: "1:224014412527:web:c8939abfab3f3f561f491a",
+    measurementId: "G-EXQLDD1SME"
+  };
+  // ════════════════════════════════════════════
+
+  let app, db;
+  let configured = false;
+
+  try {
+    if (firebaseConfig.apiKey) {
+      app = initializeApp(firebaseConfig);
+      db = getDatabase(app);
+      configured = true;
+    }
+  } catch(e) { console.warn("Firebase not configured", e); }
+
+  window.__firebase = { db, configured, ref, set, get, onValue, push, serverTimestamp };
+</script>
+
+<style>
+  :root {
+    --pink: #ff85a1;
+    --pink-light: #ffb3c6;
+    --pink-pale: #fff0f3;
+    --pink-mid: #ffd6e0;
+    --pink-deep: #e8537a;
+    --white: #ffffff;
+    --text: #5a2d3a;
+    --text-light: #c47a8a;
+    --radius: 24px;
+    --shadow: 0 8px 32px rgba(255,133,161,0.25);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(160deg, #fff0f3 0%, #ffd6e0 50%, #ffb3c6 100%);
+    min-height: 100vh; color: var(--text); overflow-x: hidden;
+  }
+
+  .hearts-bg { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+  .hearts-bg span { position:absolute; opacity:0.12; animation:floatUp linear infinite; }
+  @keyframes floatUp {
+    0% { transform:translateY(100vh) rotate(0deg); opacity:0; }
+    10% { opacity:0.12; } 90% { opacity:0.12; }
+    100% { transform:translateY(-10vh) rotate(360deg); opacity:0; }
+  }
+
+  /* SETUP SCREEN */
+  .setup-screen {
+    position:fixed; inset:0; z-index:500;
+    background: linear-gradient(160deg, #fff0f3, #ffd6e0);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:32px 24px; gap:16px;
+  }
+  .setup-logo { font-family:'Pacifico',cursive; font-size:2rem; color:var(--pink-deep); }
+  .setup-sub { font-size:0.9rem; color:var(--text-light); text-align:center; line-height:1.6; margin-bottom:8px; }
+  .setup-card {
+    background:white; border-radius:var(--radius); padding:24px;
+    box-shadow:var(--shadow); width:100%; max-width:360px;
+  }
+  .setup-label { font-size:0.8rem; font-weight:800; color:var(--text-light); margin-bottom:6px; letter-spacing:0.5px; }
+  .setup-input {
+    width:100%; background:var(--pink-pale); border:2px solid var(--pink-mid);
+    border-radius:14px; padding:12px 16px; font-size:0.95rem;
+    font-family:'Nunito',sans-serif; color:var(--text); outline:none; margin-bottom:14px;
+  }
+  .setup-input:focus { border-color:var(--pink); }
+  .setup-btn {
+    width:100%; background:linear-gradient(135deg,var(--pink),var(--pink-deep));
+    border:none; border-radius:14px; padding:14px;
+    font-size:1rem; font-weight:800; color:white; cursor:pointer;
+    font-family:'Nunito',sans-serif; box-shadow:0 4px 16px rgba(232,83,122,0.4);
+    margin-top:4px;
+  }
+  .setup-firebase-note {
+    background:rgba(255,133,161,0.1); border-radius:16px; padding:16px;
+    font-size:0.8rem; color:var(--text-light); line-height:1.8;
+    width:100%; max-width:360px;
+  }
+  .setup-firebase-note strong { color:var(--pink-deep); }
+  .setup-role-btns { display:flex; gap:10px; margin-bottom:14px; }
+  .role-btn {
+    flex:1; padding:10px; border-radius:14px; border:2.5px solid var(--pink-mid);
+    background:white; font-size:0.85rem; font-weight:700; color:var(--text-light);
+    cursor:pointer; font-family:'Nunito',sans-serif; transition:all 0.2s;
+  }
+  .role-btn.active { border-color:var(--pink-deep); background:var(--pink-pale); color:var(--pink-deep); }
+
+  /* MAIN APP */
+  .app { position:relative; z-index:1; max-width:430px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; }
+
+  .topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:52px 20px 12px;
+    background:rgba(255,255,255,0.75); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    position:sticky; top:0; z-index:100;
+    border-bottom:1px solid rgba(255,133,161,0.15);
+  }
+  .topbar-title { font-family:'Pacifico',cursive; font-size:1.25rem; color:var(--pink-deep); }
+  .topbar-icon {
+    width:38px; height:38px; background:var(--pink-pale); border-radius:50%;
+    display:flex; align-items:center; justify-content:center; font-size:1.1rem; cursor:pointer;
+  }
+  .sync-dot {
+    width:8px; height:8px; border-radius:50%; background:#ccc;
+    display:inline-block; margin-left:6px; vertical-align:middle;
+    transition:background 0.3s;
+  }
+  .sync-dot.online { background:#4ade80; box-shadow:0 0 6px rgba(74,222,128,0.6); }
+
+  .page { display:none; flex:1; overflow-y:auto; padding-bottom:90px; }
+  .page.active { display:block; }
+
+  /* HOME */
+  .couple-section { padding:24px 20px 0; display:flex; flex-direction:column; align-items:center; gap:16px; }
+  .couple-avatars { display:flex; align-items:center; width:100%; justify-content:center; }
+  .avatar-wrap { display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .avatar {
+    width:90px; height:90px; border-radius:50%; border:3px solid white;
+    box-shadow:0 4px 20px rgba(255,133,161,0.4);
+    background:var(--pink-mid); display:flex; align-items:center; justify-content:center;
+    font-size:2.5rem; cursor:pointer; transition:transform 0.2s; overflow:hidden;
+  }
+  .avatar img { width:100%; height:100%; object-fit:cover; }
+  .avatar:active { transform:scale(0.95); }
+  .avatar-name { font-size:0.85rem; font-weight:700; color:var(--text); }
+  .avatar-status-badge {
+    background:white; border-radius:20px; padding:5px 12px;
+    font-size:0.75rem; font-weight:700; color:var(--pink-deep);
+    box-shadow:0 2px 12px rgba(255,133,161,0.3); white-space:nowrap;
+  }
+  .heart-connector { display:flex; align-items:center; justify-content:center; padding:0 8px; margin-top:-30px; }
+  .heart-connector span { font-size:2rem; animation:heartbeat 1.5s ease-in-out infinite; filter:drop-shadow(0 2px 8px rgba(255,133,161,0.5)); }
+  @keyframes heartbeat { 0%,100%{transform:scale(1);} 50%{transform:scale(1.2);} }
+
+  .countdown-card {
+    margin:16px 20px 0; background:white; border-radius:var(--radius);
+    padding:24px; box-shadow:var(--shadow); text-align:center;
+  }
+  .countdown-label { font-size:0.9rem; font-weight:700; color:var(--text-light); margin-bottom:8px; }
+  .countdown-days { font-size:5rem; font-weight:900; color:var(--pink-deep); line-height:1; }
+  .countdown-unit { font-size:1rem; color:var(--text-light); font-weight:700; }
+  .countdown-time { display:flex; justify-content:center; gap:16px; margin:12px 0; }
+  .time-block { text-align:center; }
+  .time-num { font-size:1.6rem; font-weight:900; color:var(--text); display:block; }
+  .time-lbl { font-size:0.7rem; color:var(--text-light); font-weight:600; }
+  .countdown-date { font-size:0.85rem; color:var(--text-light); font-weight:700; margin-top:8px; }
+  .countdown-quote { font-size:0.8rem; color:var(--text-light); margin-top:12px; line-height:1.5; font-style:italic; }
+  .edit-date-btn {
+    margin-top:12px; background:var(--pink-pale); border:none; border-radius:12px;
+    padding:8px 16px; font-size:0.8rem; font-weight:700; color:var(--pink-deep);
+    cursor:pointer; font-family:'Nunito',sans-serif;
+  }
+
+  .section-title { font-size:1rem; font-weight:800; color:var(--text); padding:20px 20px 10px; }
+  .status-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 20px; }
+  .status-btn {
+    background:white; border:2.5px solid transparent; border-radius:16px;
+    padding:12px 10px; font-size:0.88rem; font-weight:700; color:var(--text);
+    cursor:pointer; text-align:center; transition:all 0.2s;
+    font-family:'Nunito',sans-serif; box-shadow:0 2px 12px rgba(255,133,161,0.15);
+  }
+  .status-btn:active { transform:scale(0.96); }
+  .status-btn.active {
+    background:linear-gradient(135deg,var(--pink),var(--pink-deep)); color:white;
+    border-color:var(--pink-deep); box-shadow:0 4px 16px rgba(232,83,122,0.4);
+  }
+
+  .quick-msgs { padding:0 20px; display:flex; flex-direction:column; gap:8px; }
+  .quick-msg-btn {
+    background:white; border:none; border-radius:16px; padding:14px 16px;
+    font-size:0.9rem; font-weight:700; color:var(--text); cursor:pointer;
+    text-align:left; display:flex; align-items:center; gap:10px;
+    box-shadow:0 2px 12px rgba(255,133,161,0.15); transition:all 0.2s;
+    font-family:'Nunito',sans-serif;
+  }
+  .quick-msg-btn:active { transform:scale(0.98); background:var(--pink-pale); }
+
+  /* CHAT */
+  .chat-header {
+    padding:16px 20px; text-align:center; font-size:1rem; font-weight:800; color:var(--text);
+    background:rgba(255,255,255,0.75); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    border-bottom:1px solid rgba(255,133,161,0.15);
+  }
+  .chat-messages { padding:16px 16px 0; display:flex; flex-direction:column; gap:10px; min-height:calc(100vh - 280px); }
+  .msg-date { text-align:center; font-size:0.75rem; color:var(--text-light); font-weight:600; margin:8px 0; }
+  .msg {
+    max-width:75%; padding:10px 14px; border-radius:18px;
+    font-size:0.9rem; font-weight:600; line-height:1.4;
+    animation:msgIn 0.3s ease;
+  }
+  @keyframes msgIn { from{opacity:0;transform:translateY(10px) scale(0.95);} to{opacity:1;transform:translateY(0) scale(1);} }
+  .msg-time { font-size:0.65rem; opacity:0.7; margin-top:3px; display:block; }
+  .msg.them { background:white; color:var(--text); align-self:flex-start; border-bottom-left-radius:4px; box-shadow:0 2px 8px rgba(255,133,161,0.15); }
+  .msg.me { background:linear-gradient(135deg,var(--pink),var(--pink-deep)); color:white; align-self:flex-end; border-bottom-right-radius:4px; }
+  .msg.me .msg-time { text-align:right; }
+  .msg-heart { align-self:flex-end; font-size:3rem; filter:drop-shadow(0 4px 12px rgba(255,133,161,0.5)); animation:heartbeat 1.5s ease-in-out infinite; }
+  .msg-heart.them { align-self:flex-start; }
+
+  .chat-input-area {
+    position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+    width:100%; max-width:430px; padding:10px 16px;
+    background:rgba(255,255,255,0.92); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    border-top:1px solid rgba(255,133,161,0.15);
+    display:flex; gap:8px; align-items:center;
+  }
+  .chat-input {
+    flex:1; background:var(--pink-pale); border:none; border-radius:20px;
+    padding:10px 16px; font-size:0.9rem; font-family:'Nunito',sans-serif; color:var(--text); outline:none;
+  }
+  .chat-input::placeholder { color:var(--text-light); }
+  .send-btn {
+    width:40px; height:40px; background:linear-gradient(135deg,var(--pink),var(--pink-deep));
+    border:none; border-radius:50%; font-size:1.1rem; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 12px rgba(232,83,122,0.4); transition:transform 0.2s;
+  }
+  .send-btn:active { transform:scale(0.9); }
+  .chat-extra-btn {
+    width:36px; height:36px; background:var(--pink-pale); border:none;
+    border-radius:50%; font-size:1rem; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  /* TOUCH */
+  .touch-page {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    min-height:calc(100vh - 170px); padding:20px; gap:24px;
+  }
+  .touch-title { font-size:1.2rem; font-weight:800; color:var(--text); text-align:center; }
+  .touch-sub { font-size:0.85rem; color:var(--text-light); text-align:center; max-width:260px; line-height:1.6; }
+  .heart-btn {
+    width:180px; height:180px;
+    background:radial-gradient(circle at 40% 40%, #ffb3c6, var(--pink-deep));
+    border:none; border-radius:50%; font-size:5rem; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 40px rgba(232,83,122,0.5); transition:transform 0.15s;
+    animation:pulse-ring 2s ease-in-out infinite;
+  }
+  @keyframes pulse-ring {
+    0%,100%{box-shadow:0 8px 40px rgba(232,83,122,0.5),0 0 0 0 rgba(232,83,122,0.3);}
+    50%{box-shadow:0 8px 40px rgba(232,83,122,0.5),0 0 0 24px rgba(232,83,122,0);}
+  }
+  .heart-btn:active { transform:scale(0.88); }
+  .touch-history { padding:0 20px; display:flex; flex-direction:column; gap:8px; width:100%; max-width:360px; }
+  .touch-item {
+    background:white; border-radius:14px; padding:12px 16px;
+    font-size:0.85rem; font-weight:700; color:var(--text-light);
+    box-shadow:0 2px 8px rgba(255,133,161,0.15);
+    animation:msgIn 0.3s ease;
+  }
+
+  /* SETTINGS */
+  .settings-section { padding:16px 20px 8px; }
+  .settings-card { background:white; border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); }
+  .settings-row {
+    display:flex; align-items:center; gap:14px; padding:16px;
+    border-bottom:1px solid var(--pink-pale); cursor:pointer; transition:background 0.2s;
+  }
+  .settings-row:last-child { border-bottom:none; }
+  .settings-row:active { background:var(--pink-pale); }
+  .settings-icon { width:38px; height:38px; background:var(--pink-pale); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+  .settings-label { font-size:0.9rem; font-weight:700; color:var(--text); flex:1; }
+  .settings-value { font-size:0.8rem; color:var(--text-light); font-weight:600; }
+
+  /* MODALS */
+  .modal-overlay {
+    position:fixed; inset:0; background:rgba(90,45,58,0.4);
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    z-index:200; display:none; align-items:flex-end; justify-content:center;
+  }
+  .modal-overlay.open { display:flex; }
+  .modal {
+    background:white; border-radius:28px 28px 0 0; padding:28px 24px 48px;
+    width:100%; max-width:430px; animation:slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes slideUp { from{transform:translateY(100%);} to{transform:translateY(0);} }
+  .modal-title { font-size:1.1rem; font-weight:800; color:var(--text); margin-bottom:20px; }
+  .modal-input {
+    width:100%; background:var(--pink-pale); border:2px solid var(--pink-mid);
+    border-radius:14px; padding:12px 16px; font-size:1rem;
+    font-family:'Nunito',sans-serif; color:var(--text); outline:none; margin-bottom:14px;
+  }
+  .modal-input:focus { border-color:var(--pink); }
+  .modal-save {
+    width:100%; background:linear-gradient(135deg,var(--pink),var(--pink-deep));
+    border:none; border-radius:14px; padding:14px; font-size:1rem; font-weight:800;
+    color:white; cursor:pointer; font-family:'Nunito',sans-serif;
+    box-shadow:0 4px 16px rgba(232,83,122,0.4);
+  }
+  .modal-cancel {
+    width:100%; background:var(--pink-pale); border:none; border-radius:14px;
+    padding:12px; font-size:0.9rem; font-weight:700; color:var(--text-light);
+    cursor:pointer; font-family:'Nunito',sans-serif; margin-top:8px;
+  }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+    width:100%; max-width:430px;
+    background:rgba(255,255,255,0.92); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    border-top:1px solid rgba(255,133,161,0.2);
+    display:flex; padding:8px 0 28px; z-index:100;
+  }
+  .nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:none; cursor:pointer; padding:6px 0; transition:transform 0.2s; font-family:'Nunito',sans-serif; }
+  .nav-btn:active { transform:scale(0.9); }
+  .nav-icon { font-size:1.5rem; transition:all 0.2s; }
+  .nav-label { font-size:0.65rem; font-weight:700; color:var(--text-light); transition:color 0.2s; }
+  .nav-btn.active .nav-label { color:var(--pink-deep); }
+  .nav-center-icon {
+    width:48px; height:48px;
+    background:linear-gradient(135deg,var(--pink-light),var(--pink));
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:1.6rem; box-shadow:0 4px 16px rgba(255,133,161,0.4);
+    transition:all 0.2s; margin-top:-8px;
+  }
+
+  /* NOTIFICATION BADGE */
+  .notif-badge {
+    position:absolute; top:-2px; right:-2px; width:10px; height:10px;
+    background:var(--pink-deep); border-radius:50%; border:2px solid white;
+    display:none;
+  }
+  .nav-icon-wrap { position:relative; display:inline-block; }
+
+  .toast {
+    position:fixed; top:80px; left:50%; transform:translateX(-50%) translateY(-20px);
+    background:var(--text); color:white; padding:10px 20px; border-radius:20px;
+    font-size:0.85rem; font-weight:700; opacity:0; transition:all 0.3s;
+    z-index:300; white-space:nowrap;
+  }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* TOUCH RIPPLE */
+  .touch-ripple {
+    position:fixed; border-radius:50%;
+    background:rgba(232,83,122,0.3); pointer-events:none; z-index:400;
+    animation:ripple 0.8s ease-out forwards;
+  }
+  @keyframes ripple { 0%{width:0;height:0;opacity:0.6;} 100%{width:200px;height:200px;opacity:0;} }
+</style>
+</head>
+<body>
+
+<div class="hearts-bg" id="heartsBg"></div>
+
+<!-- ═══ SETUP SCREEN ═══ -->
+<div class="setup-screen" id="setupScreen">
+  <div class="setup-logo">💕 Confortul Nostru</div>
+  <p class="setup-sub">Aplicația pentru voi doi 🌸<br>Sincronizare în timp real</p>
+
+  <div class="setup-card">
+    <div class="setup-label">CINE EȘTI TU?</div>
+    <div class="setup-role-btns">
+      <button class="role-btn active" id="roleBtn1" onclick="selectRole('partner1')">Partener 1 👤</button>
+      <button class="role-btn" id="roleBtn2" onclick="selectRole('partner2')">Partener 2 💕</button>
+    </div>
+    <div class="setup-label">NUMELE TĂU</div>
+    <input class="setup-input" id="setupName" type="text" placeholder="ex: Ana, Mihai..." maxlength="20" />
+    <div class="setup-label">NUMELE PARTENERULUI</div>
+    <input class="setup-input" id="setupPartnerName" type="text" placeholder="ex: Mihai, Ana..." maxlength="20" />
+    <div class="setup-label">COD CUPLU (același pentru amândoi!)</div>
+    <input class="setup-input" id="setupCode" type="text" placeholder="ex: ana-si-mihai-2024" maxlength="30" style="text-transform:lowercase;" />
+    <button class="setup-btn" onclick="startApp()">💕 Intră în aplicație</button>
+  </div>
+
+  <div class="setup-firebase-note">
+    <strong>⚠️ Pasul 1:</strong> Editează fișierul HTML și înlocuiește <strong>firebaseConfig</strong> cu datele tale din Firebase Console.<br><br>
+    <strong>📋 Cum creezi Firebase gratuit:</strong><br>
+    1. Mergi la <strong>console.firebase.google.com</strong><br>
+    2. Creează proiect nou<br>
+    3. Activează <strong>Realtime Database</strong><br>
+    4. Copiază config în fișier<br>
+    5. Setează regulile la: <strong>true</strong> (pentru test)
+  </div>
+</div>
+
+<!-- ═══ MAIN APP ═══ -->
+<div class="app" id="mainApp" style="display:none;">
+  <div class="topbar">
+    <div class="topbar-icon" onclick="openDatePicker()">📅</div>
+    <div class="topbar-title">
+      Confortul Nostru
+      <span class="sync-dot" id="syncDot"></span>
+    </div>
+    <div class="topbar-icon" onclick="showPage('settings')">⚙️</div>
+  </div>
+
+  <!-- HOME -->
+  <div class="page active" id="page-home">
+    <div class="couple-section">
+      <div class="couple-avatars">
+        <div class="avatar-wrap">
+          <div class="avatar">😊</div>
+          <div class="avatar-name" id="nameMe">Tu</div>
+          <div class="avatar-status-badge" id="statusMeBadge">Selectează status</div>
+        </div>
+        <div class="heart-connector"><span>💗</span></div>
+        <div class="avatar-wrap">
+          <div class="avatar">🥰</div>
+          <div class="avatar-name" id="namePartner">Iubire</div>
+          <div class="avatar-status-badge" id="statusPartnerBadge">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="countdown-card">
+      <div class="countdown-label">Până la întâlnirea noastră 💗</div>
+      <div class="countdown-days" id="cdDays">--</div>
+      <div class="countdown-unit">zile</div>
+      <div class="countdown-time">
+        <div class="time-block"><span class="time-num" id="cdH">--</span><span class="time-lbl">ore</span></div>
+        <div class="time-block"><span class="time-num" id="cdM">--</span><span class="time-lbl">minute</span></div>
+        <div class="time-block"><span class="time-num" id="cdS">--</span><span class="time-lbl">secunde</span></div>
+      </div>
+      <div class="countdown-date" id="cdDateLabel">📅 Setează data întâlnirii</div>
+      <div class="countdown-quote">Distanța este doar o dovadă că dragostea poate călători 💕</div>
+      <button class="edit-date-btn" onclick="openDatePicker()">✏️ Schimbă data</button>
+    </div>
+
+    <div class="section-title">Cum te simți? 💭</div>
+    <div class="status-grid">
+      <button class="status-btn" onclick="setStatus(this,'Fericită 😊')">Fericită 😊</button>
+      <button class="status-btn" onclick="setStatus(this,'Îmi ești dor 😢')">Îmi ești dor 😢</button>
+      <button class="status-btn" onclick="setStatus(this,'Te iubesc ❤️')">Te iubesc ❤️</button>
+      <button class="status-btn" onclick="setStatus(this,'Obosit/ă 😴')">Obosit/ă 😴</button>
+      <button class="status-btn" onclick="setStatus(this,'Ocupat/ă 💼')">Ocupat/ă 💼</button>
+      <button class="status-btn" onclick="setStatus(this,'Trist/ă 😔')">Trist/ă 😔</button>
+      <button class="status-btn" onclick="setStatus(this,'Mă gândesc la tine 🌙')">Mă gândesc 🌙</button>
+      <button class="status-btn" onclick="setStatus(this,'Am nevoie de tine 🤗')">Am nevoie 🤗</button>
+    </div>
+
+    <div class="section-title">Mesaje rapide ⚡</div>
+    <div class="quick-msgs">
+      <button class="quick-msg-btn" onclick="sendQuick('💕 Îmi ești dor de tine')">💕 Îmi ești dor de tine</button>
+      <button class="quick-msg-btn" onclick="sendQuick('📞 Sună-mă')">📞 Sună-mă</button>
+      <button class="quick-msg-btn" onclick="sendQuick('🌙 Noapte bună, dragostea mea')">🌙 Noapte bună, dragostea mea</button>
+      <button class="quick-msg-btn" onclick="sendQuick('💭 Mă gândesc la tine')">💭 Mă gândesc la tine</button>
+      <button class="quick-msg-btn" onclick="sendQuick('❤️ Te iubesc')">❤️ Te iubesc</button>
+      <button class="quick-msg-btn" onclick="sendQuick('🌟 Ești cel mai bun/bună')">🌟 Ești cel mai bun/bună</button>
+    </div>
+    <div style="height:16px;"></div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="page" id="page-chat">
+    <div class="chat-header">💬 Doar noi doi</div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-area">
+      <button class="chat-extra-btn" onclick="addEmoji()">😊</button>
+      <button class="chat-extra-btn" onclick="sendHeart()">💗</button>
+      <input class="chat-input" id="chatInput" type="text" placeholder="Scrie ceva frumos..." />
+      <button class="send-btn" onclick="sendMessage()">➤</button>
+    </div>
+  </div>
+
+  <!-- TOUCH -->
+  <div class="page" id="page-touch">
+    <div class="touch-page">
+      <div class="touch-title">Trimite o atingere 💗</div>
+      <div class="touch-sub">Apasă pe inimă și partenerul tău va simți că te gândești la el/ea</div>
+      <button class="heart-btn" id="heartBtn" onclick="sendTouch(event)">💗</button>
+      <div class="touch-history" id="touchHistory"></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="page" id="page-settings">
+    <div class="settings-section">
+      <div class="section-title">Setări 💕</div>
+      <div class="settings-card">
+        <div class="settings-row" onclick="openDatePicker()">
+          <div class="settings-icon">📅</div>
+          <div class="settings-label">Data întâlnirii</div>
+          <div class="settings-value" id="svDate">—</div>
+        </div>
+        <div class="settings-row" onclick="showInstallInstructions()">
+          <div class="settings-icon">📱</div>
+          <div class="settings-label">Instalează pe iPhone</div>
+          <div class="settings-value">→</div>
+        </div>
+        <div class="settings-row" onclick="logout()">
+          <div class="settings-icon">🚪</div>
+          <div class="settings-label">Schimbă profilul</div>
+          <div class="settings-value">→</div>
+        </div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-icon">🔄</div>
+          <div class="settings-label">Sincronizare în timp real</div>
+          <div class="settings-value" id="syncStatus">—</div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-icon">🔒</div>
+          <div class="settings-label">Cod cuplu</div>
+          <div class="settings-value" id="coupleCodeDisplay">—</div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:20px; text-align:center;">
+      <p style="font-size:0.8rem; color:var(--text-light); line-height:1.8;">
+        Distanța nu desparte inimile,<br>
+        <strong style="color:var(--pink-deep);">ea face dragostea mai puternică 💕</strong>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav" id="bottomNav" style="display:none;">
+  <button class="nav-btn active" id="nav-home" onclick="showPage('home')">
+    <span class="nav-icon">🏠</span><span class="nav-label">Acasă</span>
+  </button>
+  <button class="nav-btn" id="nav-chat" onclick="showPage('chat')">
+    <div class="nav-icon-wrap">
+      <span class="nav-icon">💬</span>
+      <div class="notif-badge" id="chatBadge"></div>
+    </div>
+    <span class="nav-label">Chat</span>
+  </button>
+  <button class="nav-btn" id="nav-touch" onclick="showPage('touch')">
+    <div class="nav-center-icon">💗</div>
+    <span class="nav-label">Atingere</span>
+  </button>
+  <button class="nav-btn" id="nav-settings" onclick="showPage('settings')">
+    <span class="nav-icon">⚙️</span><span class="nav-label">Setări</span>
+  </button>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modalDate">
+  <div class="modal">
+    <div class="modal-title">📅 Data întâlnirii noastre</div>
+    <input class="modal-input" id="modalDateInput" type="date" />
+    <button class="modal-save" onclick="saveDate()">💕 Salvează</button>
+    <button class="modal-cancel" onclick="closeModal('modalDate')">Anulează</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalInstall">
+  <div class="modal">
+    <div class="modal-title">📱 Instalează pe iPhone</div>
+    <p style="font-size:0.9rem; color:var(--text-light); line-height:1.8; margin-bottom:20px;">
+      <strong style="color:var(--text);">1.</strong> Deschide în <strong>Safari</strong><br>
+      <strong style="color:var(--text);">2.</strong> Apasă <strong>Partajare</strong> (□↑) de jos<br>
+      <strong style="color:var(--text);">3.</strong> <strong>"Adaugă la ecranul principal"</strong><br>
+      <strong style="color:var(--text);">4.</strong> Apasă <strong>"Adaugă"</strong> dreapta sus<br><br>
+      Gata! Apare ca orice aplicație 🌸
+    </p>
+    <button class="modal-save" onclick="closeModal('modalInstall')">Am înțeles! 💕</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+// Wait for firebase module
+await new Promise(r => setTimeout(r, 500));
+const { db, configured, ref, set, get, onValue, push, serverTimestamp } = window.__firebase;
+
+// ── STATE ──
+let myRole = '', myName = '', partnerName = '', coupleCode = '';
+let currentPage = 'home';
+let chatPage = false;
+let unsubscribers = [];
+
+// ── FLOATING HEARTS ──
+const bg = document.getElementById('heartsBg');
+['💕','💗','💖','🌸','✨','💝','🌺'].forEach((e,i) => {
+  for(let j=0;j<3;j++){
+    const s = document.createElement('span');
+    s.textContent = e;
+    s.style.left = Math.random()*100+'%';
+    s.style.animationDuration = (9+Math.random()*10)+'s';
+    s.style.animationDelay = (Math.random()*15)+'s';
+    s.style.fontSize = (0.8+Math.random()*1)+'rem';
+    bg.appendChild(s);
+  }
+});
+
+// ── ROLE SELECT ──
+window.selectRole = (role) => {
+  myRole = role;
+  document.getElementById('roleBtn1').classList.toggle('active', role==='partner1');
+  document.getElementById('roleBtn2').classList.toggle('active', role==='partner2');
+};
+selectRole('partner1');
+
+// ── START APP ──
+window.startApp = async () => {
+  const name = document.getElementById('setupName').value.trim();
+  const pName = document.getElementById('setupPartnerName').value.trim();
+  const code = document.getElementById('setupCode').value.trim().toLowerCase().replace(/\s+/g,'-');
+  if(!name||!pName||!code) { showToast('Completează toate câmpurile! 💕'); return; }
+
+  myName = name; partnerName = pName; coupleCode = code;
+  localStorage.setItem('comfort_profile', JSON.stringify({myRole, myName, partnerName, coupleCode}));
+
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'flex';
+  document.getElementById('bottomNav').style.display = 'flex';
+
+  initApp();
+};
+
+// ── INIT ──
+function initApp() {
+  document.getElementById('nameMe').textContent = myName;
+  document.getElementById('namePartner').textContent = partnerName;
+  document.getElementById('coupleCodeDisplay').textContent = coupleCode;
+
+  if(configured && db) {
+    document.getElementById('syncDot').classList.add('online');
+    document.getElementById('syncStatus').textContent = '🟢 Conectat';
+    listenToFirebase();
+  } else {
+    document.getElementById('syncStatus').textContent = '🔴 Offline (configurează Firebase)';
+    showToast('⚠️ Firebase neconfigurat — mod offline');
+    loadLocalData();
+  }
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+}
+
+// ── FIREBASE LISTENERS ──
+function listenToFirebase() {
+  const base = `couples/${coupleCode}`;
+
+  // Shared data (date, partner status)
+  onValue(ref(db, `${base}/shared`), snap => {
+    const d = snap.val() || {};
+    if(d.meetDate) {
+      localStorage.setItem('meetDate', d.meetDate);
+      updateDateDisplay(d.meetDate);
+    }
+    const partnerRole = myRole === 'partner1' ? 'partner2' : 'partner1';
+    const ps = d[`status_${partnerRole}`];
+    if(ps) document.getElementById('statusPartnerBadge').textContent = ps;
+  });
+
+  // Messages
+  onValue(ref(db, `${base}/messages`), snap => {
+    const msgs = snap.val();
+    if(!msgs) return;
+    const container = document.getElementById('chatMessages');
+    container.innerHTML = '';
+    Object.values(msgs).sort((a,b)=>a.ts-b.ts).forEach(m => {
+      const side = m.role === myRole ? 'me' : 'them';
+      appendMsgEl(m.text, side, m.time, m.isHeart);
+    });
+    if(currentPage !== 'chat') {
+      document.getElementById('chatBadge').style.display = 'block';
+    }
+  });
+
+  // Touch
+  onValue(ref(db, `${base}/touches`), snap => {
+    const touches = snap.val();
+    if(!touches) return;
+    const hist = document.getElementById('touchHistory');
+    hist.innerHTML = '';
+    const arr = Object.values(touches).sort((a,b)=>b.ts-a.ts).slice(0,5);
+    arr.forEach(t => {
+      const el = document.createElement('div');
+      el.className = 'touch-item';
+      el.textContent = `💗 ${t.senderName} a trimis o atingere — ${t.time}`;
+      hist.appendChild(el);
+    });
+  });
+}
+
+function loadLocalData() {
+  const md = localStorage.getItem('meetDate');
+  if(md) updateDateDisplay(md);
+  const msgs = JSON.parse(localStorage.getItem('comfort_msgs')||'[]');
+  msgs.forEach(m => appendMsgEl(m.text, m.side, m.time, m.isHeart));
+}
+
+// ── COUNTDOWN ──
+function updateCountdown() {
+  const meetDate = localStorage.getItem('meetDate');
+  if(!meetDate) return;
+  const target = new Date(meetDate+'T00:00:00');
+  const diff = target - new Date();
+  if(diff<=0){ document.getElementById('cdDays').textContent='🎉'; return; }
+  document.getElementById('cdDays').textContent = Math.floor(diff/86400000);
+  document.getElementById('cdH').textContent = String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
+  document.getElementById('cdM').textContent = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+  document.getElementById('cdS').textContent = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+}
+
+function updateDateDisplay(date) {
+  if(!date) return;
+  const d = new Date(date+'T00:00:00');
+  const months=['ian','feb','mar','apr','mai','iun','iul','aug','sep','oct','nov','dec'];
+  const label = `📅 ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  document.getElementById('cdDateLabel').textContent = label;
+  document.getElementById('svDate').textContent = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+  updateCountdown();
+}
+
+// ── STATUS ──
+window.setStatus = (btn, status) => {
+  document.querySelectorAll('.status-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('statusMeBadge').textContent = status;
+  const key = `status_${myRole}`;
+  if(configured && db) {
+    set(ref(db, `couples/${coupleCode}/shared/${key}`), status);
+  } else {
+    localStorage.setItem('myStatus', status);
+  }
+  showToast('Status actualizat! 💕');
+};
+
+// ── CHAT ──
+window.sendMessage = () => {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  sendMsg(text, false);
+};
+
+window.sendHeart = () => sendMsg('💗', true);
+
+window.sendQuick = (msg) => {
+  sendMsg(msg, false);
+  showPage('chat');
+};
+
+function sendMsg(text, isHeart) {
+  const now = new Date();
+  const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const msg = { text, time, role: myRole, isHeart, ts: Date.now() };
+
+  if(configured && db) {
+    push(ref(db, `couples/${coupleCode}/messages`), msg);
+  } else {
+    appendMsgEl(text, 'me', time, isHeart);
+    const msgs = JSON.parse(localStorage.getItem('comfort_msgs')||'[]');
+    msgs.push({text, side:'me', time, isHeart});
+    localStorage.setItem('comfort_msgs', JSON.stringify(msgs.slice(-100)));
+  }
+}
+
+function appendMsgEl(text, side, time, isHeart) {
+  const container = document.getElementById('chatMessages');
+  if(isHeart || text === '💗') {
+    const el = document.createElement('div');
+    el.className = 'msg-heart'; el.textContent = '💗';
+    el.style.alignSelf = side==='me' ? 'flex-end' : 'flex-start';
+    container.appendChild(el);
+  } else {
+    const el = document.createElement('div');
+    el.className = `msg ${side}`;
+    el.innerHTML = `${text}<span class="msg-time">${time}</span>`;
+    container.appendChild(el);
+  }
+  scrollChat();
+}
+
+function scrollChat() {
+  const c = document.getElementById('chatMessages');
+  setTimeout(()=>{ c.scrollTop = c.scrollHeight; }, 80);
+}
+
+window.addEmoji = () => {
+  const emojis = ['💕','🥰','😘','❤️','🌸','✨','💖','😊','🫶'];
+  const input = document.getElementById('chatInput');
+  input.value += emojis[Math.floor(Math.random()*emojis.length)];
+  input.focus();
+};
+
+document.getElementById('chatInput').addEventListener('keydown', e => {
+  if(e.key==='Enter') window.sendMessage();
+});
+
+// ── TOUCH ──
+window.sendTouch = (e) => {
+  const btn = document.getElementById('heartBtn');
+  btn.style.transform = 'scale(0.85)';
+  setTimeout(()=>{ btn.style.transform=''; }, 200);
+
+  // Ripple
+  const ripple = document.createElement('div');
+  ripple.className = 'touch-ripple';
+  const rect = btn.getBoundingClientRect();
+  ripple.style.left = (rect.left + rect.width/2 - 0) + 'px';
+  ripple.style.top = (rect.top + rect.height/2 - 0) + 'px';
+  ripple.style.marginLeft = '-100px'; ripple.style.marginTop = '-100px';
+  document.body.appendChild(ripple);
+  setTimeout(()=>ripple.remove(), 800);
+
+  const now = new Date();
+  const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const touch = { senderName: myName, role: myRole, time, ts: Date.now() };
+
+  if(configured && db) {
+    push(ref(db, `couples/${coupleCode}/touches`), touch);
+  }
+  showToast(`💗 Atingere trimisă, ${partnerName} a simțit!`);
+};
+
+// ── DATE ──
+window.openDatePicker = () => {
+  const md = localStorage.getItem('meetDate');
+  if(md) document.getElementById('modalDateInput').value = md;
+  document.getElementById('modalDate').classList.add('open');
+};
+
+window.saveDate = () => {
+  const val = document.getElementById('modalDateInput').value;
+  if(!val) return;
+  localStorage.setItem('meetDate', val);
+  if(configured && db) set(ref(db, `couples/${coupleCode}/shared/meetDate`), val);
+  updateDateDisplay(val);
+  closeModal('modalDate');
+  showToast('Data salvată! 📅');
+};
+
+// ── NAVIGATION ──
+window.showPage = (name) => {
+  currentPage = name;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(`page-${name}`).classList.add('active');
+  const nb = document.getElementById(`nav-${name}`);
+  if(nb) nb.classList.add('active');
+  if(name==='chat') {
+    document.getElementById('chatBadge').style.display = 'none';
+    scrollChat();
+  }
+};
+
+// ── MODALS ──
+window.closeModal = (id) => document.getElementById(id).classList.remove('open');
+window.showInstallInstructions = () => document.getElementById('modalInstall').classList.add('open');
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
+});
+
+// ── LOGOUT ──
+window.logout = () => {
+  localStorage.removeItem('comfort_profile');
+  location.reload();
+};
+
+// ── TOAST ──
+window.showToast = (msg) => {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+};
+
+// ── CHECK SAVED PROFILE ──
+const saved = localStorage.getItem('comfort_profile');
+if(saved) {
+  const p = JSON.parse(saved);
+  myRole = p.myRole; myName = p.myName; partnerName = p.partnerName; coupleCode = p.coupleCode;
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'flex';
+  document.getElementById('bottomNav').style.display = 'flex';
+  initApp();
+}
+</script>
+</body>
+</html>
